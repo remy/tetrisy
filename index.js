@@ -1,3 +1,4 @@
+import Vue from './vue.js';
 import makeCanvas from './canvas.js';
 import Tet from './Tetromino.js';
 import { BRICK_SIZE, STARTING_SPEED, COLS, ROWS } from './config.js';
@@ -151,8 +152,63 @@ async function stop() {
   makeNewBlock();
 }
 
+const randInt = (a, b) => ~~(Math.random() * (b - a) + a);
+
+function glitch() {
+  const { ctx } = game;
+  const canvas = ctx.canvas;
+  const { width: w, height: h } = canvas;
+
+  for (let i = 0; i < randInt(1, 13); i++) {
+    const x = Math.random() * w;
+    const y = Math.random() * h;
+    const spliceWidth = w - x;
+    const spliceHeight = randInt(5, h / 3);
+    ctx.drawImage(
+      canvas,
+      0,
+      y,
+      spliceWidth,
+      spliceHeight,
+      x,
+      y,
+      spliceWidth,
+      spliceHeight
+    );
+    ctx.drawImage(
+      canvas,
+      spliceWidth,
+      y,
+      x,
+      spliceHeight,
+      0,
+      y,
+      x,
+      spliceHeight
+    );
+  }
+
+  writeText('GAME OVER');
+}
+
+function writeText(text) {
+  game.ctx.globalCompositeOperation = 'xor';
+  game.ctx.font = '4vh monospace';
+  game.ctx.fillText(text, BRICK_SIZE * COLS * 0.15, (ROWS * BRICK_SIZE) / 2);
+  game.ctx.globalCompositeOperation = 'source-over';
+}
+
 function makeNewBlock() {
   game.current = new Tet();
+  if (!memory.isFree(game.current)) {
+    game.running = false; // game over
+    setInterval(() => {
+      drawMemory();
+      writeText('GAME OVER');
+      setTimeout(glitch, randInt(250, 1000));
+    }, 500);
+  }
+  renderTetromino(game.current);
   game.current.handlers.draw = () => {
     if (game.running) renderTetromino(game.current);
   };
@@ -165,9 +221,8 @@ function loop(delta) {
       game.lastLoop = delta;
       game.current.drop();
     }
+    requestAnimationFrame(loop);
   }
-
-  requestAnimationFrame(loop);
 }
 
 function handleKeys(e) {
@@ -243,3 +298,4 @@ window.game = game;
 window.test = test;
 window.memory = memory;
 window.drawMemory = drawMemory;
+window.render = () => renderTetromino(game.current);

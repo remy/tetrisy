@@ -6,12 +6,11 @@ export const pages = [Uint8Array.from(memory)];
 export const reset = () => {
   pages.length = 0;
   memory.fill(0);
-}
+};
 
 export const forEach = cb => memory.forEach(cb);
 
 export const getIndexForXY = (x, y, width = COLS) => {
-
   if (x < 0) {
     throw new Error(`out of bounds: x(${x}) < 0`);
   }
@@ -29,31 +28,41 @@ export const getIndexForXY = (x, y, width = COLS) => {
   }
 
   return width * y + x;
-}
+};
 
 export const getXYForIndex = i => {
   const x = i % COLS;
   const y = (i / COLS) | 0;
 
   return { x, y };
-}
+};
 
-export const toString = (source = memory) => source.reduce((acc, curr, i) => {
-  const { y } = getXYForIndex(i);
-  if (!acc[y]) acc[y] = '';
-  acc[y] += curr ? String.fromCharCode(curr === 1 ? 88 : curr) : ' ';
-  return acc;
-}, []).join('\n');
+export const toString = (source = memory) =>
+  source
+    .reduce((acc, curr, i) => {
+      const { y } = getXYForIndex(i);
+      if (!acc[y]) acc[y] = '';
+      acc[y] += curr ? String.fromCharCode(curr === 1 ? 88 : curr) : ' ';
+      return acc;
+    }, [])
+    .join('\n');
 
 export const write = tet => {
-  const { x, y, w, h, shape, type: { char } } = tet;
+  const {
+    x,
+    y,
+    w,
+    h,
+    shape,
+    type: { char },
+  } = tet;
 
   // ordering is important so we can jump straight to the shape value
   let ctr = 0;
   for (let k = y; k < y + h; k++) {
     for (let j = x; j < x + w; j++) {
-      let i = getIndexForXY(j, k);
       if (shape[ctr]) {
+        let i = getIndexForXY(j, k);
         memory[i] = char.charCodeAt(0); // (ignored for now)
       }
       ctr++;
@@ -62,9 +71,8 @@ export const write = tet => {
 
   pages.push(Uint8Array.from(memory));
 
-//   document.querySelector('#memdump').innerHTML = toString().replace(/0/g, '🔲').replace(/1/g, '🔳')
-
-}
+  //   document.querySelector('#memdump').innerHTML = toString().replace(/0/g, '🔲').replace(/1/g, '🔳')
+};
 
 export const test = tet => {
   const { x, y, w, h, shape } = tet;
@@ -75,17 +83,19 @@ export const test = tet => {
   let ctr = 0;
   for (let k = y; k < y + h; k++) {
     for (let j = x; j < x + w; j++) {
-      let i = getIndexForXY(j, k);
-      res[ctr] = memory[i];
-      if (shape[ctr] && memory[i]) {
-        hit = true;
+      if (shape[ctr]) {
+        let i = getIndexForXY(j, k);
+        res[ctr] = memory[i];
+        if (shape[ctr] && memory[i]) {
+          hit = true;
+        }
       }
       ctr++;
     }
   }
 
   return { hit, res };
-}
+};
 
 export const checkForLines = () => {
   const res = [];
@@ -103,7 +113,7 @@ export const checkForLines = () => {
   }
 
   return res;
-}
+};
 
 export const removeLine = y => {
   // copy all the content above down to and over this line
@@ -113,13 +123,13 @@ export const removeLine = y => {
   memory.fill(0, 0, COLS);
 
   pages.push(Uint8Array.from(memory));
-}
+};
 
 export const isFree = tet => {
   try {
     return !test(tet).hit;
   } catch (E) {
-//     console.log(E);
+    // console.log(E);
     return false;
   }
-}
+};

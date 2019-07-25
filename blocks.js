@@ -34,56 +34,60 @@ To rotate 270deg, rotation is applied then reversed.
 
 export const T = {
   char: 'T',
-  rotate: 39, // 0b100111
-  shape: [1, 1, 1, 0, 1, 0],
+  rotate: 160,
+  shape: [0, 0, 0, 1, 1, 1, 0, 1, 0], // 000111010 => 010011010
   w: 3,
-  h: 2,
+  h: 3,
 };
 
 export const DUCK = {
+  rotations: 2,
   char: 'S',
-  rotate: 51, // 0b110011
-  shape: [0, 1, 1, 1, 1, 0],
+  rotate: 135,
+  shape: [0, 0, 0, 0, 1, 1, 1, 1, 0], // 0b000011110 ^ 0b010011001
   w: 3,
-  h: 2,
+  h: 3,
 };
 
 export const R_DUCK = {
+  rotations: 2,
   char: 'Z',
-  rotate: 45,
-  shape: [1, 1, 0, 0, 1, 1],
+  rotate: 105,
+  shape: [0, 0, 0, 1, 1, 0, 0, 1, 1], // 000110011 => 001011010
   w: 3,
-  h: 2,
+  h: 3,
 };
 
 export const SQUARE = {
+  rotations: 1,
   char: 'O',
   rotate: 0,
-  shape: [1, 1, 1, 1],
-  w: 2,
-  h: 2,
+  shape: [0, 0, 0, 1, 1, 0, 1, 1, 0],
+  w: 3,
+  h: 3,
 };
 
 export const L = {
   char: 'L',
-  rotate: 23, // 0b10111
-  shape: [1, 0, 1, 0, 1, 1],
-  w: 2,
+  rotate: 175,
+  shape: [0, 0, 0, 1, 1, 1, 1, 0, 0], // 000111100 => 010010011
+  w: 3,
   h: 3,
 };
 
 export const J = {
   char: 'J',
-  rotate: 48,
-  shape: [0, 1, 0, 1, 1, 1],
-  w: 2,
+  rotate: 175,
+  shape: [0, 0, 0, 1, 1, 1, 0, 0, 1], // 000111100 => 010010011
+  w: 3,
   h: 3,
 };
 
 export const BAR = {
+  rotations: 2,
   char: 'I',
-  rotate: 0,
-  shape: [1, 1, 1, 1],
-  w: 1,
+  rotate: 11554,
+  shape: [0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], // 0b0000111100000000 ^ 0b0010001000100010
+  w: 4,
   h: 4,
 };

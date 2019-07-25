@@ -7,7 +7,7 @@ const types = Object.keys(blocks);
 
 export default class Tetromino {
   constructor(name = types[(Math.random() * types.length) | 0]) {
-    this.name = name; // = 'BAR';
+    this.name = name = 'DUCK';
     this.type = blocks[name];
 
     this.shape = Array.from(this.type.shape);
@@ -16,12 +16,12 @@ export default class Tetromino {
     this.x = ((COLS / 2) | 0) - 1;
     this.y = -1;
     this.rotation = 0;
+    this.handlers = {};
   }
 
-  handlers = {};
-
   rotate(anti = false) {
-    let rotation = (this.rotation + (anti ? -1 : 1)) % 4;
+    let rotation =
+      (this.rotation + (anti ? -1 : 1)) % (this.type.rotations || 4);
 
     let shape;
 

@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Tetris clone thingy</title>
-  <script src="/vue.js"></script>
+  <title>Tetrisy</title>
+  <link rel="favicon" href="/favicon.png">
+  <link rel="manifest" href="manifest.json">
   <link href="index.css" rel="stylesheet">
 </head>
 <body>
@@ -20,10 +21,16 @@
   <div id="touch-controls">
     <div v-on:click="input('left', $event)" class="left"></div>
     <div v-on:click="input('right', $event)" class="right"></div>
-    <div v-on:click="input('down', $event)" class="down"></div>
+    <div v-on:click="input('down', $event)" v-on:on:dblclick="input('down-fast', $event)" class="down"></div>
     <div v-on:click="input('rotate', $event)" class="rotate"></div>
   </div>
 </div>
-<script type="module" src="index.js"></script>
+<script type="module" src="./index.js"></script>
+<script nomodule src="./dist/main.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
+  </script>
 </body>
 </html>

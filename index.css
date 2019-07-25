@@ -6,11 +6,16 @@
   font-style: normal;
 }
 
+[v-cloak] {
+  display: none;
+}
+
 * {
   box-sizing: border-box;
   color: white;
   font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
   font-size: 18px;
+  user-select: none;
 }
 
 label {
@@ -64,4 +69,51 @@ html, body {
 
 body {
   padding: 10px;
+}
+
+[data-input="keys"] #touch-controls {
+  display: none;
+}
+
+#touch-controls {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+}
+
+#touch-controls div {
+  opacity: 0;
+  background-repeat: no-repeat;
+  background-color: white;
+  background-size: contain;
+  background-position: center;
+}
+
+#touch-controls .left {
+  height: 70vh;
+  grid-area: 1 / 1 / 2 / 2;
+  background-image: url(/left.svg);
+}
+#touch-controls .right {
+  grid-area: 1 / 2 / 2 / 3;
+  background-image: url(/right.svg);
+}
+#touch-controls .down {
+  grid-area: 2 / 2 / 3 / 3;
+  background-image: url(/down.svg);
+}
+#touch-controls .rotate {
+  grid-area: 2 / 1 / 3 / 2;
+  background-image: url(/rotate.svg);
+}
+
+#touch-controls :active {
+  opacity: 0.1;
 }

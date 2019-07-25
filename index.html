@@ -5,18 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Tetris clone thingy</title>
-<!--   <script src="/vue.js"></script> -->
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="/vue.js"></script>
   <link href="index.css" rel="stylesheet">
 </head>
 <body>
 <div id="game"></div>
 <pre class="debug" id="memdump"></pre>
-<div id="controls">
+<div v-cloak id="controls">
   <div id="score">{{ score | pad }}</div>
   <div v-bind:hidden="!debug" id="more">
-    <label>Running <input v-on:change="running" type="checkbox" v-model="running"></label>
-    <label>Memory page: <input type="range" v-on:change="page" v-model="pageId" min="0" v-bind:max="pages.length - 1"> ({{ pageId | pad }})<label>
+    <label>Running <input v-on:change="runningChange" type="checkbox" v-model="running"></label>
+    <label>Memory page: <input type="range" v-on:change="pageChange" v-model="pageId" min="0" v-bind:max="pages.length - 1"> ({{ pageId | pad }})<label>
+  </div>
+  <div id="touch-controls">
+    <div v-on:click="input('left', $event)" class="left"></div>
+    <div v-on:click="input('right', $event)" class="right"></div>
+    <div v-on:click="input('down', $event)" class="down"></div>
+    <div v-on:click="input('rotate', $event)" class="rotate"></div>
   </div>
 </div>
 <script type="module" src="index.js"></script>

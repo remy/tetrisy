@@ -4,30 +4,55 @@ import { BRICK_SIZE, STARTING_SPEED, COLS, ROWS } from './config.js';
 import * as memory from './memory.js';
 
 const game = new Vue({
-    el: '#controls',
-    filters: {
-      pad: s => s.toString().padStart(3, '0')
+  el: '#controls',
+  filters: {
+    pad: s => s.toString().padStart(3, '0'),
+  },
+  data: {
+    pageId: 0,
+    score: 0,
+    speed: STARTING_SPEED,
+    lastLoop: 0,
+    pages: memory.pages,
+    debug: false,
+    running: false,
+  },
+  methods: {
+    runningChange() {
+      this.pageId = memory.pages.length - 1;
+      memory.memory.set(memory.pages[this.pageId], 0);
     },
-    data: {
-      pageId: 0,
-      score: 0,
-      speed: STARTING_SPEED,
-      lastLoop: 0,
-      pages: memory.pages,
-      debug: false,
-      running: false,
+    pageChange() {
+      memory.memory.set(memory.pages[this.pageId], 0);
+      drawMemory();
     },
-    methods: {
-      running() {
-        this.pageId = memory.pages.length - 1;
-        memory.memory.set(memory.pages[this.pageId], 0);
-      },
-      page() {
-        memory.memory.set(memory.pages[this.pageId], 0);
-        drawMemory();
+    input(dir, e) {
+      e.target.blur();
+      if (dir === 'left') {
+        game.current.move(0);
       }
-    }
-  })
+
+      if (dir === 'right') {
+        game.current.move(1);
+      }
+
+      if (dir === 'rotate') {
+        game.current.rotate();
+      }
+
+      if (dir === 'down') {
+        const touches = e.changedTouches || [true];
+        if (touches.length === 1) {
+          game.current.drop();
+        }
+
+        if (touches.length > 1) {
+          game.current.dropFast();
+        }
+      }
+    },
+  },
+});
 
 // how much does a block take up?
 // 40x40 (for now)
@@ -40,13 +65,12 @@ function reset() {
 }
 
 function updateSpeed() {
-  game.speed = ((10 - (game.score / 10 | 0)) * 0.05) * 1000;
+  game.speed = (10 - ((game.score / 10) | 0)) * 0.05 * 1000;
 }
 
 function drawMemory() {
   game.ctx.canvas.width = game.ctx.canvas.width;
   game.ctx.fillStyle = 'white';
-
 
   const c = game.ctx;
   memory.forEach((v, i) => {
@@ -56,7 +80,6 @@ function drawMemory() {
     }
   });
   c.fill();
-  
 }
 
 function renderTetromino(brick) {
@@ -77,7 +100,7 @@ function renderTetromino(brick) {
     let y = 0;
 
     x = BRICK_SIZE * (i % brick.w);
-    y = BRICK_SIZE * (i / brick.w | 0);
+    y = BRICK_SIZE * ((i / brick.w) | 0);
 
     if (e) {
       c.rect(x, y, BRICK_SIZE, BRICK_SIZE);
@@ -92,7 +115,7 @@ function renderTetromino(brick) {
 
 async function flashLine(y) {
   return new Promise(resolve => {
-    const styles = ['red', 'blue']
+    const styles = ['red', 'blue'];
     const timer = setInterval(() => {
       game.ctx.fillStyle = styles.reverse()[0];
       game.ctx.fillRect(0, y * BRICK_SIZE, COLS * BRICK_SIZE, BRICK_SIZE);
@@ -102,7 +125,7 @@ async function flashLine(y) {
       game.ctx.fillStyle = 'white';
       resolve();
     }, 1000);
-  })
+  });
 }
 
 async function stop() {
@@ -112,10 +135,12 @@ async function stop() {
 
   if (lines.length) {
     game.running = false;
-    await Promise.all(lines.map((y, i) => {
-      memory.removeLine(y + i);
-      return flashLine(y); // note that flashing is done on printed lines and not memory
-    }));
+    await Promise.all(
+      lines.map((y, i) => {
+        memory.removeLine(y + i);
+        return flashLine(y); // note that flashing is done on printed lines and not memory
+      })
+    );
     game.score += lines.length;
     updateSpeed();
     game.running = true;
@@ -129,10 +154,9 @@ function makeNewBlock() {
   game.current = new Tet();
   game.current.handlers.draw = () => {
     if (game.running) renderTetromino(game.current);
-  }
+  };
   game.current.handlers.stop = stop;
 }
-
 
 function loop(delta) {
   if (game.running) {
@@ -146,49 +170,39 @@ function loop(delta) {
 }
 
 function handleKeys(e) {
-  if (e.key === 'ArrowLeft') {
+  document.body.dataset.input = 'keys';
+  if (e.which === 37) {
+    // left
     game.current.move(0);
     return;
   }
 
-  if (e.key === 'ArrowDown') {
+  if (e.which === 40) {
+    // down
     game.current.drop();
     return;
   }
 
-  if (e.key === 'ArrowRight') {
+  if (e.which === 39) {
+    // right
     game.current.move(1);
     return;
   }
 
-  if (e.which === 32) { // space
+  if (e.which === 32) {
+    // space
     game.current.rotate(e.shiftKey);
   }
 
-  if (e.which === 13) { // enter
+  if (e.which === 13) {
+    // enter
     game.current.dropFast();
   }
 
-  if (e.which === 191) { // ?
+  if (e.which === 191) {
+    // ?
     game.debug = !game.debug;
   }
-}
-
-function bindTouch() {
-  document.body.addEventListener("touchstart", e => {
-    const touches = e.changedTouches;
-    if (e.target.nodeName === 'CANVAS') {
-      game.current.rotate();
-    } else {
-      if (touches[0].clientY > game.ctx.canvas.height) {
-        game.current.drop();
-      } else if (touches[0].clientX < window.innerWidth / 2) {
-        game.current.move(0);
-      } else {
-        game.current.move(1);
-      }
-    }
-  }, false);
 }
 
 function setup() {
@@ -212,8 +226,6 @@ function setup() {
   game.ctx = ctx;
 
   window.onkeydown = handleKeys;
-
-  bindTouch()
 
   makeNewBlock();
   requestAnimationFrame(loop);

@@ -115,7 +115,7 @@ function renderTetromino(brick) {
 
 async function flashLine(y) {
   return new Promise(resolve => {
-    const styles = ['red', 'blue'];
+    const styles = ['white', 'black'];
     const timer = setInterval(() => {
       game.ctx.fillStyle = styles.reverse()[0];
       game.ctx.fillRect(0, y * BRICK_SIZE, COLS * BRICK_SIZE, BRICK_SIZE);

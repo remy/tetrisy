@@ -6,21 +6,21 @@ import * as memory from './memory.js';
 const types = Object.keys(blocks);
 
 export default class Tetromino {
-  constructor(name = types[Math.random() * types.length | 0]) {
+  constructor(name = types[(Math.random() * types.length) | 0]) {
     this.name = name; // = 'BAR';
     this.type = blocks[name];
 
     this.shape = Array.from(this.type.shape);
     this.w = this.type.w;
     this.h = this.type.h;
-    this.x = (COLS / 2 | 0) - 1;
+    this.x = ((COLS / 2) | 0) - 1;
     this.y = -1;
     this.rotation = 0;
   }
 
-  handlers = {}
+  handlers = {};
 
-  rotate(anti = false) { 
+  rotate(anti = false) {
     let rotation = (this.rotation + (anti ? -1 : 1)) % 4;
 
     let shape;
@@ -31,19 +31,31 @@ export default class Tetromino {
       shape = Array.from(this.type.shape);
     }
 
-    if (rotation === 1) { // 90deg
-      shape = numToArray(arrayToNum(this.type.shape) ^ this.type.rotate, this.shape.length);
+    if (rotation === 1) {
+      // 90deg
+      shape = numToArray(
+        arrayToNum(this.type.shape) ^ this.type.rotate,
+        this.shape.length
+      );
     }
 
-    if (rotation === 2) { // 180deg
+    if (rotation === 2) {
+      // 180deg
       shape = Array.from(this.type.shape).reverse();
     }
 
-    if (rotation === 3) { // 27deg
-      shape = numToArray(arrayToNum(this.type.shape) ^ this.type.rotate, this.shape.length).reverse();
+    if (rotation === 3) {
+      // 27deg
+      shape = numToArray(
+        arrayToNum(this.type.shape) ^ this.type.rotate,
+        this.shape.length
+      ).reverse();
     }
 
-    const [w, h] = rotation % 2 == 1 ? [this.type.h, this.type.w] : [this.type.w, this.type.h];
+    const [w, h] =
+      rotation % 2 == 1
+        ? [this.type.h, this.type.w]
+        : [this.type.w, this.type.h];
 
     if (memory.isFree({ shape, w, h, x: this.x, y: this.y })) {
       // commit
@@ -54,7 +66,6 @@ export default class Tetromino {
 
       this.emit('draw');
     }
-
   }
 
   move(direction) {
@@ -92,15 +103,14 @@ export default class Tetromino {
   }
 
   canMoveDown() {
-    return (memory.isFree({ ...this, y: this.y + 1}));
+    return memory.isFree({ ...this, y: this.y + 1 });
   }
 
   canMoveLeft() {
-    return (memory.isFree({ ...this, x: this.x - 1}));
+    return memory.isFree({ ...this, x: this.x - 1 });
   }
 
   canMoveRight() {
-    return (memory.isFree({ ...this, x: this.x + 1}));
+    return memory.isFree({ ...this, x: this.x + 1 });
   }
-
 }

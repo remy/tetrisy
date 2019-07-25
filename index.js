@@ -27,6 +27,7 @@ const game = new Vue({
       drawMemory();
     },
     input(dir, e) {
+      document.body.dataset.input = 'mouse';
       e.target.blur();
       if (dir === 'left') {
         game.current.move(0);

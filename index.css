@@ -71,10 +71,6 @@ body {
   padding: 10px;
 }
 
-[data-input="keys"] #touch-controls {
-  display: none;
-}
-
 #touch-controls {
   position: fixed;
   top: 0;
@@ -122,8 +118,8 @@ body {
   background-image: url(/rotate.svg);
 }
 
-#touch-controls :active,
-#touch-controls .show {
+[data-input="mouse"] #touch-controls :active,
+[data-input="mouse"] #touch-controls .show {
   opacity: 0.1;
 }
 

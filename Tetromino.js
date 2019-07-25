@@ -7,7 +7,7 @@ const types = Object.keys(blocks);
 
 export default class Tetromino {
   constructor(name = types[(Math.random() * types.length) | 0]) {
-    this.name = name = 'DUCK';
+    this.name = name;
     this.type = blocks[name];
 
     this.shape = Array.from(this.type.shape);

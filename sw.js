@@ -1,6 +1,6 @@
 // we'll version our cache (and learn how to delete caches in
 // some other post)
-const cacheName = 'v2::static';
+const cacheName = 'v4::static';
 
 function updateStaticCache() {
   return caches.open(cacheName).then(cache => {
@@ -27,13 +27,29 @@ function updateStaticCache() {
   });
 }
 
+function clearOldCaches() {
+  return caches.keys().then(keys => {
+    return Promise.all(
+      keys
+        .filter(key => {
+          return !key.startsWith(cacheName);
+        })
+        .map(key => {
+          console.log('deleting old cache %s', key);
+
+          return caches.delete(key);
+        })
+    );
+  });
+}
+
 self.addEventListener('install', event => {
   event.waitUntil(updateStaticCache().then(() => self.skipWaiting()));
 });
 
-// self.addEventListener('activate', event => {
-//   event.waitUntil(clearOldCaches().then(() => self.clients.claim()));
-// });
+self.addEventListener('activate', event => {
+  event.waitUntil(clearOldCaches().then(() => self.clients.claim()));
+});
 
 self.addEventListener('fetch', event => {
   let request = event.request;

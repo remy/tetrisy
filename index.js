@@ -17,6 +17,7 @@ const game = new Vue({
     pages: memory.pages,
     debug: false,
     running: false,
+    down: false,
   },
   methods: {
     runningChange() {
@@ -27,31 +28,42 @@ const game = new Vue({
       memory.memory.set(memory.pages[this.pageId], 0);
       drawMemory();
     },
+    cancelInput() {
+      clearTimeout(this.down);
+      this.down = false;
+    },
     input(dir, e) {
       document.body.dataset.input = 'mouse';
+
+      const move = (repeat = true) => {
+        if (dir === 'left') {
+          game.current.move(0);
+        }
+
+        if (dir === 'right') {
+          game.current.move(1);
+        }
+
+        if (dir === 'rotate') {
+          game.current.rotate();
+        }
+
+        if (dir === 'down') {
+          const touches = e.changedTouches || [true];
+          if (touches.length === 1) {
+            game.current.drop();
+          }
+        }
+
+        if (repeat) {
+          this.down = setTimeout(move, 50);
+        }
+      };
+
+      this.down = setTimeout(move, 500);
+      move(false);
+
       e.target.blur();
-      if (dir === 'left') {
-        game.current.move(0);
-      }
-
-      if (dir === 'right') {
-        game.current.move(1);
-      }
-
-      if (dir === 'rotate') {
-        game.current.rotate();
-      }
-
-      if (dir === 'down') {
-        const touches = e.changedTouches || [true];
-        if (touches.length === 1) {
-          game.current.drop();
-        }
-
-        if (touches.length > 1) {
-          game.current.dropFast();
-        }
-      }
     },
   },
 });

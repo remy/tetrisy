@@ -54,7 +54,7 @@ export const write = tet => {
     for (let j = x; j < x + w; j++) {
       let i = getIndexForXY(j, k);
       if (shape[ctr]) {
-        memory[i] = 1; // char.charCodeAt(0); (ignored for now)
+        memory[i] = char.charCodeAt(0); // (ignored for now)
       }
       ctr++;
     }

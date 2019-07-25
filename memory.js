@@ -3,6 +3,24 @@ import { ROWS, COLS } from './config.js';
 export const memory = new Uint8Array(ROWS * COLS);
 export const pages = [Uint8Array.from(memory)];
 
+export const loadMemory = test => {
+  const lines = test.split('\n');
+  let ctr = 0;
+  for (let i = 0; i < lines.length; i++) {
+    for (let k = 0; k < lines[i].length; k++) {
+      const chr = lines[i][k];
+      if (chr !== '0') {
+        memory[ctr] = chr.charCodeAt(0);
+      } else {
+        memory[ctr] = 0;
+      }
+      ctr++;
+    }
+  }
+
+  console.log(toString());
+};
+
 export const reset = () => {
   pages.length = 0;
   memory.fill(0);

@@ -4,6 +4,8 @@ import Tet from './Tetromino.js';
 import { BRICK_SIZE, STARTING_SPEED, COLS, ROWS } from './config.js';
 import * as memory from './memory.js';
 
+// import * as TESTS from './tests.js';
+
 const game = new Vue({
   el: '#controls',
   filters: {
@@ -18,6 +20,7 @@ const game = new Vue({
     debug: false,
     running: false,
     down: false,
+    upAt: null,
   },
   methods: {
     runningChange() {
@@ -29,11 +32,22 @@ const game = new Vue({
       drawMemory();
     },
     cancelInput() {
+      console.log('up');
+      this.upAt = Date.now();
       clearTimeout(this.down);
       this.down = false;
     },
     input(dir, e) {
+      if (e.type === 'click') {
+        if (Date.now() - 10 <= this.upAt) {
+          return;
+        }
+      }
+      console.log('down %s', e.type);
+
       document.body.dataset.input = 'mouse';
+      clearTimeout(this.down);
+      this.down = false;
 
       const move = (repeat = true) => {
         if (dir === 'left') {
@@ -60,7 +74,9 @@ const game = new Vue({
         }
       };
 
-      this.down = setTimeout(move, 500);
+      if (event.type !== 'click' && dir !== 'repeat') {
+        this.down = setTimeout(move, 500);
+      }
       move(false);
 
       e.target.blur();
@@ -210,8 +226,8 @@ function writeText(text) {
   game.ctx.globalCompositeOperation = 'source-over';
 }
 
-function makeNewBlock() {
-  game.current = new Tet();
+function makeNewBlock(next) {
+  game.current = new Tet(next);
   if (!memory.isFree(game.current)) {
     game.running = false; // game over
     setInterval(() => {
@@ -295,6 +311,8 @@ function setup() {
 
   window.onkeydown = handleKeys;
 
+  // memory.loadMemory(TESTS.A.base);
+  // makeNewBlock(TESTS.A.next);
   makeNewBlock();
   requestAnimationFrame(loop);
 }

@@ -1,14 +1,10 @@
 {
   "webpack": "webpack ./index.js bundle.js",
   "mode": "production",
-  "now": {
-    "version": 1,
-    "type": "static",
-    "alias": "tetris.isthe.link"
-  },
   "scripts": {
     "start": "serve",
-    "deploy": "webpack && now && now alias"
+    "build": "webpack",
+    "deploy": "npm run build && now && now alias"
   },
   "devDependencies": {
     "babel-plugin-transform-class-properties": "^6.24.1",

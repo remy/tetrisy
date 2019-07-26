@@ -1,6 +1,6 @@
 // we'll version our cache (and learn how to delete caches in
 // some other post)
-const cacheName = 'v10::static';
+const cacheName = 'v11::static';
 
 function updateStaticCache() {
   return caches.open(cacheName).then(cache => {
@@ -12,16 +12,12 @@ function updateStaticCache() {
       '/blocks.js',
       '/canvas.js',
       '/config.js',
-      '/down.svg',
       '/favicon.png',
       '/font.woff',
       '/font.woff2',
       '/index.css',
       '/index.js',
-      '/left.svg',
       '/memory.js',
-      '/right.svg',
-      '/rotate.svg',
       '/vue.js',
     ]);
   });
@@ -35,8 +31,6 @@ function clearOldCaches() {
           return !key.startsWith(cacheName);
         })
         .map(key => {
-          console.log('deleting old cache %s', key);
-
           return caches.delete(key);
         })
     );
@@ -53,5 +47,5 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   let request = event.request;
-  event.respondWith(fetch(request).catch(() => caches.match(request)));
+  event.respondWith(caches.match(request).catch(() => fetch(request)));
 });

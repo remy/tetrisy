@@ -37,9 +37,9 @@ export const getIndexForXY = (x, y, width = COLS) => {
     throw new Error(`out of bounds: x(${x}) > COLS(${COLS})`);
   }
 
-  if (y < 0) {
-    throw new Error(`out of bounds: y(${y}) < 0`);
-  }
+  // if (y < 0) {
+  //   throw new Error(`out of bounds: y(${y}) < 0`);
+  // }
 
   if (y >= ROWS) {
     throw new Error(`out of bounds: y(${y}) > ROWS(${ROWS})`);

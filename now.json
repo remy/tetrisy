@@ -1,5 +1,10 @@
 {
   "version": 2,
-  "builds": [{ "src": "**/*", "use": "@now/static" }],
-  "alias": "tetris.isthe.link"
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@now/static-build"
+    }
+  ],
+  "alias": ["tetris.isthe.link"]
 }

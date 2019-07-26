@@ -1,4 +1,12 @@
+const join = require('path').join;
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 module.exports = {
-  entry: './index.js',
   mode: 'production',
+  plugins: [new CopyWebpackPlugin([{ from: 'src' }])],
+  // entry: './src/index.js',
+  output: {
+    // path: join(__dirname, '/build'),
+    filename: 'bundle.js',
+  },
 };

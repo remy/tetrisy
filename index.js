@@ -299,7 +299,7 @@ function handleKeys(e) {
     return;
   }
 
-  if (e.which === 32) {
+  if (e.which === 32 || e.which === 38) {
     // space
     action('rotate', e.shiftKey);
   }

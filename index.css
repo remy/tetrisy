@@ -35,8 +35,9 @@ label {
   border: 5px solid #eee;
 }
 
-canvas {
-/*   background: blue; */
+#next {
+  margin: auto;
+  display: block;
 }
 
 #main {

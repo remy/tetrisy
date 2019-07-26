@@ -32,18 +32,17 @@ const game = new Vue({
       drawMemory();
     },
     cancelInput() {
-      console.log('up');
       this.upAt = Date.now();
       clearTimeout(this.down);
       this.down = false;
     },
     input(dir, e) {
+      // prevent click from firing straight after a touch event
       if (e.type === 'click') {
         if (Date.now() - 10 <= this.upAt) {
           return;
         }
       }
-      console.log('down %s', e.type);
 
       document.body.dataset.input = 'mouse';
       clearTimeout(this.down);
@@ -51,21 +50,21 @@ const game = new Vue({
 
       const move = (repeat = true) => {
         if (dir === 'left') {
-          game.current.move(0);
+          action('move', 0);
         }
 
         if (dir === 'right') {
-          game.current.move(1);
+          action('move', 1);
         }
 
         if (dir === 'rotate') {
-          game.current.rotate();
+          action('rotate');
         }
 
         if (dir === 'down') {
           const touches = e.changedTouches || [true];
           if (touches.length === 1) {
-            game.current.drop();
+            action('drop');
           }
         }
 
@@ -83,9 +82,6 @@ const game = new Vue({
     },
   },
 });
-
-// how much does a block take up?
-// 40x40 (for now)
 
 function reset() {
   game.running = true;
@@ -112,6 +108,31 @@ function drawMemory() {
   c.fill();
 }
 
+function tetrominoToCTX({ brick, ctx }) {
+  ctx.canvas.width = BRICK_SIZE * brick.w;
+  ctx.canvas.height = BRICK_SIZE * brick.h;
+  ctx.fillStyle = 'white';
+
+  brick.shape.map((e, i) => {
+    if (e) {
+      const x = BRICK_SIZE * (i % brick.w);
+      const y = BRICK_SIZE * ((i / brick.w) | 0);
+      ctx.rect(x, y, BRICK_SIZE, BRICK_SIZE);
+    }
+  });
+
+  ctx.fill();
+}
+
+function drawNext() {
+  const prev = document.querySelector('#next');
+  if (prev) prev.remove();
+  tetrominoToCTX({
+    ctx: makeCanvas('next', document.querySelector('#controls')),
+    brick: game.next,
+  });
+}
+
 function renderTetromino(brick) {
   drawMemory();
 
@@ -121,24 +142,8 @@ function renderTetromino(brick) {
 
   c.canvas.hidden = true;
   c.canvas.className = 'debug';
-  c.canvas.width = BRICK_SIZE * brick.w;
-  c.canvas.height = BRICK_SIZE * brick.h;
-  c.fillStyle = 'white';
 
-  brick.shape.map((e, i) => {
-    let x = 0;
-    let y = 0;
-
-    x = BRICK_SIZE * (i % brick.w);
-    y = BRICK_SIZE * ((i / brick.w) | 0);
-
-    if (e) {
-      c.rect(x, y, BRICK_SIZE, BRICK_SIZE);
-    }
-    c.fill();
-  });
-
-  c.fill();
+  tetrominoToCTX({ ctx: c, brick });
 
   game.ctx.drawImage(c.canvas, brick.x * BRICK_SIZE, brick.y * BRICK_SIZE);
 }
@@ -159,12 +164,12 @@ async function flashLine(y) {
 }
 
 async function stop() {
+  game.running = false;
   memory.write(game.current);
 
   const lines = memory.checkForLines();
 
   if (lines.length) {
-    game.running = false;
     await Promise.all(
       lines.map((y, i) => {
         memory.removeLine(y + i);
@@ -173,9 +178,10 @@ async function stop() {
     );
     game.score += lines.length;
     updateSpeed();
-    game.running = true;
-    loop();
   }
+
+  game.running = true;
+  loop();
 
   makeNewBlock();
 }
@@ -216,25 +222,37 @@ function glitch() {
     );
   }
 
-  writeText('GAME OVER');
+  gameOverText();
 }
 
-function writeText(text) {
+function gameOverText() {
   game.ctx.globalCompositeOperation = 'xor';
   game.ctx.font = '4vh monospace';
-  game.ctx.fillText(text, BRICK_SIZE * COLS * 0.15, (ROWS * BRICK_SIZE) / 2);
+  game.ctx.fillText(
+    'GAME OVER',
+    BRICK_SIZE * COLS * 0.15,
+    (ROWS * BRICK_SIZE) / 2
+  );
   game.ctx.globalCompositeOperation = 'source-over';
 }
 
-function makeNewBlock(next) {
-  game.current = new Tet(next);
+function gameOver() {
+  game.running = false; // game over
+  setInterval(() => {
+    drawMemory();
+    gameOverText();
+    setTimeout(glitch, randInt(250, 1000));
+  }, 500);
+}
+
+function makeNewBlock() {
+  game.current = game.next || new Tet();
+  game.next = new Tet();
+
+  drawNext();
+
   if (!memory.isFree(game.current)) {
-    game.running = false; // game over
-    setInterval(() => {
-      drawMemory();
-      writeText('GAME OVER');
-      setTimeout(glitch, randInt(250, 1000));
-    }, 500);
+    return gameOver();
   }
   renderTetromino(game.current);
   game.current.handlers.draw = () => {
@@ -243,11 +261,19 @@ function makeNewBlock(next) {
   game.current.handlers.stop = stop;
 }
 
+function action(type, arg) {
+  // ensures all user actions go through the game running test.
+  // this is a bit lazy, but it works.
+  if (game.running) {
+    game.current[type](arg);
+  }
+}
+
 function loop(delta) {
   if (game.running) {
     if (delta - game.lastLoop > game.speed) {
       game.lastLoop = delta;
-      game.current.drop();
+      action('drop');
     }
     requestAnimationFrame(loop);
   }
@@ -257,30 +283,30 @@ function handleKeys(e) {
   document.body.dataset.input = 'keys';
   if (e.which === 37) {
     // left
-    game.current.move(0);
+    action('move', 0);
     return;
   }
 
   if (e.which === 40) {
     // down
-    game.current.drop();
+    action('drop');
     return;
   }
 
   if (e.which === 39) {
     // right
-    game.current.move(1);
+    action('move', 1);
     return;
   }
 
   if (e.which === 32) {
     // space
-    game.current.rotate(e.shiftKey);
+    action('rotate', e.shiftKey);
   }
 
   if (e.which === 13) {
     // enter
-    game.current.dropFast();
+    action('dropFast');
   }
 
   if (e.which === 191) {

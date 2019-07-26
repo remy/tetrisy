@@ -1,5 +1,4 @@
 {
-  "version": 1,
-  "type": "static",
+  "static": true,
   "alias": "tetris.isthe.link"
 }

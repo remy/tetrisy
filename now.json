@@ -1,4 +1,5 @@
 {
-  "static": true,
+  "version": 2,
+  "builds": [{ "src": "**/*", "use": "@now/static" }],
   "alias": "tetris.isthe.link"
 }

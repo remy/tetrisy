@@ -21,7 +21,7 @@ export default class Tetromino {
 
   rotate(anti = false) {
     let rotation =
-      (this.rotation + (anti ? -1 : 1)) % (this.type.rotations || 4);
+      (this.rotation + (anti ? 1 : -1)) % (this.type.rotations || 4);
 
     let shape;
 

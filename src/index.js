@@ -58,7 +58,7 @@ const game = new Vue({
         }
 
         if (dir === 'rotate') {
-          action('rotate', true);
+          action('rotate');
         }
 
         if (dir === 'down') {

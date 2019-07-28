@@ -58,7 +58,7 @@ const game = new Vue({
         }
 
         if (dir === 'rotate') {
-          action('rotate');
+          action('rotate', true);
         }
 
         if (dir === 'down') {
@@ -334,6 +334,9 @@ function setup() {
   ctx.canvas.style.borderWidth = BRICK_SIZE + 'px';
 
   game.ctx = ctx;
+
+  document.querySelector('#left').style.height = `${ctx.canvas.offsetHeight +
+    ctx.canvas.offsetTop}px`;
 
   window.onkeydown = handleKeys;
 

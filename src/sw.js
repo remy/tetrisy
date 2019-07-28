@@ -1,6 +1,6 @@
 // we'll version our cache (and learn how to delete caches in
 // some other post)
-const cacheName = 'v11::static';
+const cacheName = 'v12::static';
 
 function updateStaticCache() {
   return caches.open(cacheName).then(cache => {
@@ -47,6 +47,5 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   let request = event.request;
-  // event.respondWith(fetch(request).catch(() => caches.match(request)));
   event.respondWith(caches.match(request).then(res => res || fetch(request)));
 });

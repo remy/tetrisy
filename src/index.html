@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Tetrisy</title>
+  <title>Blocsy McDropsy</title>
   <link rel="icon" sizes="512x512" href="/favicon.png">
   <link rel="shortcut icon" href="/favicon.png">
   <link rel="manifest" href="manifest.json">
@@ -20,7 +20,7 @@
     <label>Memory page: <input type="range" v-on:change="pageChange" v-model="pageId" min="0" v-bind:max="pages.length - 1"> ({{ pageId | pad }})<label>
   </div>
   <div id="touch-controls">
-    <div id="left" v-on:touchend="cancelInput" v-on:touchstart="input('left', $event)"  v-on:click="input('left', $event)" class="left"></div>
+    <div v-on:touchend="cancelInput" v-on:touchstart="input('left', $event)"  v-on:click="input('left', $event)" class="left"></div>
     <div v-on:touchend="cancelInput" v-on:touchstart="input('right', $event)"  v-on:click="input('right', $event)" class="right"></div>
     <div v-on:touchend="cancelInput" v-on:touchstart="input('down', $event)"  v-on:click="input('down', $event)" class="down"></div>
     <div v-on:click="input('rotate', $event)" class="rotate"></div>

@@ -12,6 +12,9 @@ const game = new Vue({
     pad: s => s.toString().padStart(3, '0'),
   },
   data: {
+    settings: {
+      layout: 2,
+    },
     pageId: 0,
     score: 0,
     speed: STARTING_SPEED,
@@ -21,6 +24,20 @@ const game = new Vue({
     running: false,
     down: false,
     upAt: null,
+  },
+  mounted() {
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      let layout = searchParams.get('layout');
+      if (layout) {
+        layout = parseInt(layout || 1, 10);
+        localStorage.setItem('layout', '2');
+      } else {
+        layout = parseInt(localStorage.getItem('layout') || 1, 10);
+      }
+      this.settings.layout = layout;
+    } catch (e) {}
+    document.documentElement.className = `layout-${this.settings.layout}`;
   },
   methods: {
     runningChange() {
@@ -335,9 +352,16 @@ function setup() {
 
   game.ctx = ctx;
 
-  document.querySelector('#left').style.height = `${ctx.canvas.offsetHeight +
-    ctx.canvas.offsetTop}px`;
-
+  const layout = game.settings.layout;
+  document.querySelector('#touch-controls .left').style.height = `${ctx.canvas
+    .offsetHeight + ctx.canvas.offsetTop}px`;
+  if (layout === 1) {
+  } else if (layout === 2) {
+    document.querySelector(
+      '#touch-controls'
+    ).style.gridTemplateColumns = `auto ${ctx.canvas.offsetWidth -
+      BRICK_SIZE}px auto`;
+  }
   window.onkeydown = handleKeys;
 
   // memory.loadMemory(TESTS.A.base);

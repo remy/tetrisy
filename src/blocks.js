@@ -40,7 +40,7 @@ export const T = {
   h: 3,
 };
 
-export const DUCK = {
+export const S = {
   rotations: 2,
   char: 'S',
   rotate: 135,
@@ -49,7 +49,7 @@ export const DUCK = {
   h: 3,
 };
 
-export const R_DUCK = {
+export const Z = {
   rotations: 2,
   char: 'Z',
   rotate: 105,
@@ -58,7 +58,7 @@ export const R_DUCK = {
   h: 3,
 };
 
-export const SQUARE = {
+export const O = {
   rotations: 1,
   char: 'O',
   rotate: 0,
@@ -83,7 +83,7 @@ export const J = {
   h: 3,
 };
 
-export const BAR = {
+export const I = {
   rotations: 2,
   char: 'I',
   rotate: 11554,

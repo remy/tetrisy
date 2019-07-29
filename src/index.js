@@ -2,6 +2,7 @@ import Vue from './vue.js';
 import makeCanvas from './canvas.js';
 import Tet from './Tetromino.js';
 import { BRICK_SIZE, STARTING_SPEED, COLS, ROWS } from './config.js';
+import { speedForLevel } from './speed.js';
 import * as memory from './memory.js';
 
 // import * as TESTS from './tests.js';
@@ -63,9 +64,11 @@ const game = new Vue({
 
       document.body.dataset.input = 'mouse';
       clearTimeout(this.down);
-      this.down = false;
 
       const move = (repeat = true) => {
+        if (repeat) {
+          this.down = setTimeout(move, 50);
+        }
         if (dir === 'left') {
           action('move', 0);
         }
@@ -79,19 +82,12 @@ const game = new Vue({
         }
 
         if (dir === 'down') {
-          const touches = e.changedTouches || [true];
-          if (touches.length === 1) {
-            action('drop');
-          }
-        }
-
-        if (repeat) {
-          this.down = setTimeout(move, 50);
+          action('drop');
         }
       };
 
       if (event.type !== 'click' && dir !== 'repeat') {
-        this.down = setTimeout(move, 500);
+        this.down = setTimeout(move, 65);
       }
       move(false);
 
@@ -108,7 +104,10 @@ function reset() {
 }
 
 function updateSpeed() {
-  game.speed = (10 - ((game.score / 10) | 0)) * 0.05 * 1000;
+  const level = (game.score / 10) | 0;
+  game.speed = speedForLevel(level);
+
+  // game.speed = (10 - ((game.score / 10) | 0)) * 0.05 * 1000;
 }
 
 function drawMemory() {
@@ -266,6 +265,8 @@ function makeNewBlock() {
   game.current = game.next || new Tet();
   game.next = new Tet();
 
+  // clearTimeout(game.down);
+
   drawNext();
 
   if (!memory.isFree(game.current)) {
@@ -364,8 +365,9 @@ function setup() {
   }
   window.onkeydown = handleKeys;
 
-  // memory.loadMemory(TESTS.A.base);
-  // makeNewBlock(TESTS.A.next);
+  // memory.loadMemory(TESTS.B.base);
+  // game.next = new Tet(TESTS.B.next);
+
   makeNewBlock();
   requestAnimationFrame(loop);
 }

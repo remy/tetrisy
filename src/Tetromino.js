@@ -4,9 +4,20 @@ import { arrayToNum, numToArray } from './bit-tools.js';
 import * as memory from './memory.js';
 
 const types = Object.keys(blocks);
+const limited = ['I', 'J', 'L', 'O', 'T'];
+
+let last = [];
 
 export default class Tetromino {
   constructor(name = types[(Math.random() * types.length) | 0]) {
+    last.push(name);
+    last = last.slice(-4);
+    if (last.join('').replace(/[SZ]/g, '') === '') {
+      console.log('giving you a break');
+
+      name = limited[(Math.random() * limited.length) | 0];
+    }
+
     this.name = name;
     this.type = blocks[name];
 

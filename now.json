@@ -6,5 +6,5 @@
       "use": "@now/static-build"
     }
   ],
-  "alias": ["tetris.isthe.link"]
+  "alias": ["tetris.isthe.link", "tetrominos.isthe.link"]
 }

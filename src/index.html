@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Blocsy McDropsy</title>
+  <title>Tetrominos</title>
   <link rel="icon" sizes="512x512" href="/favicon.png">
   <link rel="shortcut icon" href="/favicon.png">
   <link rel="manifest" href="manifest.json">
@@ -29,7 +29,7 @@
 <script type="module" src="./index.js"></script>
 <script nomodule src="./bundle.js"></script>
 <script>
-  if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator && location.hostname !== 'localhost' && !location.hostname.includes('192')) {
     navigator.serviceWorker.register('/sw.js');
   }
   </script>

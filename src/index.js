@@ -14,7 +14,7 @@ const game = new Vue({
   },
   data: {
     settings: {
-      layout: 2,
+      layout: 1,
     },
     pageId: 0,
     score: 0,
@@ -32,7 +32,7 @@ const game = new Vue({
       let layout = searchParams.get('layout');
       if (layout) {
         layout = parseInt(layout || 1, 10);
-        localStorage.setItem('layout', '2');
+        localStorage.setItem('layout', layout);
       } else {
         layout = parseInt(localStorage.getItem('layout') || 1, 10);
       }
@@ -87,7 +87,7 @@ const game = new Vue({
       };
 
       if (event.type !== 'click' && dir !== 'repeat') {
-        this.down = setTimeout(move, 65);
+        this.down = setTimeout(move, 500);
       }
       move(false);
 

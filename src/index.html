@@ -20,9 +20,9 @@
     <label>Memory page: <input type="range" v-on:change="pageChange" v-model="pageId" min="0" v-bind:max="pages.length - 1"> ({{ pageId | pad }})<label>
   </div>
   <div id="touch-controls">
-    <div v-on:mouseup="cancelInput('left')" v-on:mousedown="input('left', $event)" v-on:click="input('left', $event)" class="left"></div>
-    <div v-on:mouseup="cancelInput('right')" v-on:mousedown="input('right', $event)" v-on:click="input('right', $event)" class="right"></div>
-    <div v-on:mouseup="cancelInput('down')" v-on:mousedown="input('down', $event)" v-on:click="input('down', $event)" class="down"></div>
+    <div v-on:touchend="cancelInput('left')" v-on:touchstart="input('left', $event)" v-on:click="input('left', $event)" class="left"></div>
+    <div v-on:touchend="cancelInput('right')" v-on:touchstart="input('right', $event)" v-on:click="input('right', $event)" class="right"></div>
+    <div v-on:touchend="cancelInput('down')" v-on:touchstart="input('down', $event)" v-on:click="input('down', $event)" class="down"></div>
     <div v-on:click="input('rotate', $event)" class="rotate"></div>
   </div>
 </div>

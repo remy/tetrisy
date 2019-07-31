@@ -2,7 +2,7 @@
 
 // we'll version our cache (and learn how to delete caches in
 // some other post)
-const cacheName = 'v17::static';
+const cacheName = 'v18::static';
 
 function updateStaticCache() {
   return caches.open(cacheName).then(cache => {
@@ -21,7 +21,7 @@ function updateStaticCache() {
       '/index.css',
       '/index.js',
       '/memory.js',
-      '/vue.js',
+      '/vue.js'
     ]);
   });
 }
@@ -50,15 +50,17 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const req = event.request;
-  event.respondWith(caches.match(req).then(res => {
-    if (res) {
-      return res;
-    }
+  event.respondWith(
+    caches.match(req).then(res => {
+      if (res) {
+        return res;
+      }
 
-    return fetch(req).then(res => {
-      const clone = res.clone();
-      caches.open(cacheName).then(cache => cache.put(req, clone));
-      return res;
-    });
-  }));
+      return fetch(req).then(res => {
+        const clone = res.clone();
+        caches.open(cacheName).then(cache => cache.put(req, clone));
+        return res;
+      });
+    })
+  );
 });

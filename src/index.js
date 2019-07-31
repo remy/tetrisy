@@ -1,7 +1,7 @@
 import Vue from './vue.js';
 import makeCanvas from './canvas.js';
 import Tet from './Tetromino.js';
-import { BRICK_SIZE, STARTING_SPEED, COLS, ROWS } from './config.js';
+import { BRICK_SIZE, STARTING_SPEED, COLS, ROWS, FRAME_RATE } from './config.js';
 import { speedForLevel } from './speed.js';
 import * as memory from './memory.js';
 
@@ -20,11 +20,18 @@ const game = new Vue({
     score: 0,
     speed: STARTING_SPEED,
     lastLoop: 0,
+    lastMove: 0,
     pages: memory.pages,
     debug: false,
     running: false,
     down: false,
     upAt: null,
+    controls: {
+      left: false,
+      right: false,
+      rotate: false,
+      down: false,
+    }
   },
   mounted() {
     try {
@@ -49,10 +56,11 @@ const game = new Vue({
       memory.memory.set(memory.pages[this.pageId], 0);
       drawMemory();
     },
-    cancelInput() {
+    cancelInput(dir) {
       this.upAt = Date.now();
       clearTimeout(this.down);
       this.down = false;
+      cancelAction(dir);
     },
     input(dir, e) {
       // prevent click from firing straight after a touch event
@@ -66,24 +74,11 @@ const game = new Vue({
       clearTimeout(this.down);
 
       const move = (repeat = true) => {
-        if (repeat) {
-          this.down = setTimeout(move, 50);
-        }
-        if (dir === 'left') {
-          action('move', 0);
-        }
-
-        if (dir === 'right') {
-          action('move', 1);
-        }
-
         if (dir === 'rotate') {
-          action('rotate');
+          rotate(true);
         }
 
-        if (dir === 'down') {
-          action('drop');
-        }
+        action(dir);
       };
 
       if (event.type !== 'click' && dir !== 'repeat') {
@@ -279,33 +274,82 @@ function makeNewBlock() {
   game.current.handlers.stop = stop;
 }
 
+function rotate(clockwise) {
+  if (game.running) {
+    game.current.rotate(clockwise);
+  }
+}
+
 function action(type, arg) {
   // ensures all user actions go through the game running test.
   // this is a bit lazy, but it works.
   if (game.running) {
-    game.current[type](arg);
+    game.controls[type] = true;
   }
+}
+
+function cancelAction(type) {
+  game.controls[type] = false;
 }
 
 function loop(delta) {
   if (game.running) {
+    // check controls
+    // 60 times per second - before the up occurs
+    
+    if (delta - game.lastMove > (6 * FRAME_RATE)) {
+      game.lastMove = delta;
+      if (game.controls.left) {
+        game.current.move(0)
+      }
+
+      if (game.controls.right) {
+        game.current.move(1);
+      }
+
+      if (game.controls.drop) {
+        game.current.drop();
+      }
+    }
+
+    
     if (delta - game.lastLoop > game.speed) {
       game.lastLoop = delta;
-      action('drop');
+      game.current.drop();
     }
     requestAnimationFrame(loop);
   }
 }
 
-function handleKeys(e) {
-  document.body.dataset.input = 'keys';
-  if (e.which === 37) {
-    // left
-    action('move', 0);
-    return;
+function handleKeyUp(e) {
+  if (e.which === 37) { // left
+    cancelAction('left');
   }
 
   if (e.which === 40) {
+    // down
+    cancelAction('drop');
+  }
+
+  if (e.which === 39) {
+    // right
+    cancelAction('right');
+  }
+
+}
+
+function handleKeyDown(e) {
+  document.body.dataset.input = 'keys';
+
+  console.log(e.key)
+  
+  if (e.which === 37) {
+    // left
+    action('left');
+    return;
+  }
+
+  if (e.key === 'ArrowDown') {
     // down
     action('drop');
     return;
@@ -313,18 +357,18 @@ function handleKeys(e) {
 
   if (e.which === 39) {
     // right
-    action('move', 1);
+    action('right');
     return;
   }
 
   if (e.which === 32 || e.which === 38) {
     // space
-    action('rotate', e.shiftKey);
+    rotate(!e.shiftKey);
   }
 
   if (e.which === 13) {
     // enter
-    action('dropFast');
+//     action('dropFast');
   }
 
   if (e.which === 191) {
@@ -363,7 +407,8 @@ function setup() {
     ).style.gridTemplateColumns = `auto ${ctx.canvas.offsetWidth -
       BRICK_SIZE}px auto`;
   }
-  window.onkeydown = handleKeys;
+  window.onkeydown = handleKeyDown;
+  window.onkeyup = handleKeyUp;
 
   // memory.loadMemory(TESTS.B.base);
   // game.next = new Tet(TESTS.B.next);

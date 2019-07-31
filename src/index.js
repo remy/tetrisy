@@ -36,7 +36,7 @@ const game = new Vue({
       left: false,
       right: false,
       rotate: false,
-      down: false
+      drop: false
     }
   },
   mounted() {
@@ -261,6 +261,8 @@ function gameOver() {
 function makeNewBlock() {
   game.current = game.next || new Tet();
   game.next = new Tet();
+
+  game.controls.drop = false;
 
   // clearTimeout(game.down);
 

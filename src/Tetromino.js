@@ -1,5 +1,5 @@
 import * as blocks from './blocks.js';
-import { BRICK_SIZE, COLS, ROWS } from './config.js';
+import { COLS } from './config.js';
 import { arrayToNum, numToArray } from './bit-tools.js';
 import * as memory from './memory.js';
 

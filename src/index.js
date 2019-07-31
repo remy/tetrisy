@@ -1,7 +1,13 @@
 import Vue from './vue.js';
 import makeCanvas from './canvas.js';
 import Tet from './Tetromino.js';
-import { BRICK_SIZE, STARTING_SPEED, COLS, ROWS, FRAME_RATE } from './config.js';
+import {
+  BRICK_SIZE,
+  STARTING_SPEED,
+  COLS,
+  ROWS,
+  FRAME_RATE
+} from './config.js';
 import { speedForLevel } from './speed.js';
 import * as memory from './memory.js';
 
@@ -10,11 +16,11 @@ import * as memory from './memory.js';
 const game = new Vue({
   el: '#controls',
   filters: {
-    pad: s => s.toString().padStart(3, '0'),
+    pad: s => s.toString().padStart(3, '0')
   },
   data: {
     settings: {
-      layout: 1,
+      layout: 1
     },
     pageId: 0,
     score: 0,
@@ -30,7 +36,7 @@ const game = new Vue({
       left: false,
       right: false,
       rotate: false,
-      down: false,
+      down: false
     }
   },
   mounted() {
@@ -44,7 +50,9 @@ const game = new Vue({
         layout = parseInt(localStorage.getItem('layout') || 1, 10);
       }
       this.settings.layout = layout;
-    } catch (e) {}
+    } catch (e) {
+      // noop
+    }
     document.documentElement.className = `layout-${this.settings.layout}`;
   },
   methods: {
@@ -73,22 +81,15 @@ const game = new Vue({
       document.body.dataset.input = 'mouse';
       clearTimeout(this.down);
 
-      const move = (repeat = true) => {
-        if (dir === 'rotate') {
-          rotate(true);
-        }
-
-        action(dir);
-      };
-
-      if (event.type !== 'click' && dir !== 'repeat') {
-        this.down = setTimeout(move, 500);
+      if (dir === 'rotate') {
+        rotate(true);
       }
-      move(false);
+
+      action(dir);
 
       e.target.blur();
-    },
-  },
+    }
+  }
 });
 
 function reset() {
@@ -106,6 +107,7 @@ function updateSpeed() {
 }
 
 function drawMemory() {
+  // eslint-disable-next-line no-self-assign
   game.ctx.canvas.width = game.ctx.canvas.width;
   game.ctx.fillStyle = 'white';
 
@@ -140,7 +142,7 @@ function drawNext() {
   if (prev) prev.remove();
   tetrominoToCTX({
     ctx: makeCanvas('next', document.querySelector('#controls')),
-    brick: game.next,
+    brick: game.next
   });
 }
 
@@ -280,7 +282,7 @@ function rotate(clockwise) {
   }
 }
 
-function action(type, arg) {
+function action(type) {
   // ensures all user actions go through the game running test.
   // this is a bit lazy, but it works.
   if (game.running) {
@@ -296,11 +298,11 @@ function loop(delta) {
   if (game.running) {
     // check controls
     // 60 times per second - before the up occurs
-    
-    if (delta - game.lastMove > (6 * FRAME_RATE)) {
+
+    if (delta - game.lastMove > 6 * FRAME_RATE) {
       game.lastMove = delta;
       if (game.controls.left) {
-        game.current.move(0)
+        game.current.move(0);
       }
 
       if (game.controls.right) {
@@ -312,7 +314,6 @@ function loop(delta) {
       }
     }
 
-    
     if (delta - game.lastLoop > game.speed) {
       game.lastLoop = delta;
       game.current.drop();
@@ -322,7 +323,8 @@ function loop(delta) {
 }
 
 function handleKeyUp(e) {
-  if (e.which === 37) { // left
+  if (e.which === 37) {
+    // left
     cancelAction('left');
   }
 
@@ -335,14 +337,13 @@ function handleKeyUp(e) {
     // right
     cancelAction('right');
   }
-
 }
 
 function handleKeyDown(e) {
   document.body.dataset.input = 'keys';
 
-  console.log(e.key)
-  
+  console.log(e.key);
+
   if (e.which === 37) {
     // left
     action('left');
@@ -368,7 +369,7 @@ function handleKeyDown(e) {
 
   if (e.which === 13) {
     // enter
-//     action('dropFast');
+    //     action('dropFast');
   }
 
   if (e.which === 191) {
@@ -401,6 +402,7 @@ function setup() {
   document.querySelector('#touch-controls .left').style.height = `${ctx.canvas
     .offsetHeight + ctx.canvas.offsetTop}px`;
   if (layout === 1) {
+    // do nothing
   } else if (layout === 2) {
     document.querySelector(
       '#touch-controls'

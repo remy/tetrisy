@@ -1,4 +1,3 @@
-const join = require('path').join;
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {

@@ -1,3 +1,5 @@
+/* eslint-env serviceworker */
+
 // we'll version our cache (and learn how to delete caches in
 // some other post)
 const cacheName = 'v17::static';
@@ -47,17 +49,16 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  let request = event.request;
-  event.respondWith(caches.match(request).then(res => {
-    console.log(request.url, !!res);
-
-    return res || fetch(request);
-
+  const req = event.request;
+  event.respondWith(caches.match(req).then(res => {
     if (res) {
-      console.log(res.status);
       return res;
     }
 
-    return fetch(request);
+    return fetch(req).then(res => {
+      const clone = res.clone();
+      caches.open(cacheName).then(cache => cache.put(req, clone));
+      return res;
+    });
   }));
 });

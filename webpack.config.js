@@ -6,7 +6,7 @@ module.exports = {
   plugins: [new CopyWebpackPlugin([{ from: 'src' }])],
   // entry: './src/index.js',
   output: {
-    // path: join(__dirname, '/build'),
+
     filename: 'bundle.js',
   },
 };

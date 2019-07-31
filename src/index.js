@@ -68,7 +68,7 @@ const game = new Vue({
       this.upAt = Date.now();
       clearTimeout(this.down);
       this.down = false;
-      cancelAction(dir);
+      setTimeout(() => cancelAction(dir), FRAME_RATE * 15); // aim to clear the state in the next move frame
     },
     input(dir, e) {
       // prevent click from firing straight after a touch event

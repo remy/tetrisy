@@ -344,8 +344,6 @@ function handleKeyUp(e) {
 function handleKeyDown(e) {
   document.body.dataset.input = 'keys';
 
-  console.log(e.key);
-
   if (e.which === 37) {
     // left
     action('left');

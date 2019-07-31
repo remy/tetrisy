@@ -20,7 +20,7 @@ const game = new Vue({
   },
   data: {
     settings: {
-      layout: 1
+      layout: 3
     },
     pageId: 0,
     score: 0,
@@ -30,12 +30,11 @@ const game = new Vue({
     pages: memory.pages,
     debug: false,
     running: false,
-    down: false,
     upAt: null,
     controls: {
+      todo: '',
       left: false,
       right: false,
-      rotate: false,
       drop: false
     }
   },
@@ -44,10 +43,13 @@ const game = new Vue({
       const searchParams = new URLSearchParams(window.location.search);
       let layout = searchParams.get('layout');
       if (layout) {
-        layout = parseInt(layout || 1, 10);
+        layout = parseInt(layout || this.settings.layout, 10);
         localStorage.setItem('layout', layout);
       } else {
-        layout = parseInt(localStorage.getItem('layout') || 1, 10);
+        layout = parseInt(
+          localStorage.getItem('layout') || this.settings.layout,
+          10
+        );
       }
       this.settings.layout = layout;
     } catch (e) {
@@ -66,9 +68,7 @@ const game = new Vue({
     },
     cancelInput(dir) {
       this.upAt = Date.now();
-      clearTimeout(this.down);
-      this.down = false;
-      setTimeout(() => cancelAction(dir), FRAME_RATE * 15); // aim to clear the state in the next move frame
+      setTimeout(() => cancelAction(dir), FRAME_RATE * 10); // aim to clear the state in the next move frame
     },
     input(dir, e) {
       // prevent click from firing straight after a touch event
@@ -76,13 +76,18 @@ const game = new Vue({
         if (Date.now() - 10 <= this.upAt) {
           return;
         }
+
+        this.cancelInput(dir);
       }
 
       document.body.dataset.input = 'mouse';
-      clearTimeout(this.down);
 
       if (dir === 'rotate') {
-        rotate(true);
+        return rotate(true);
+      }
+
+      if (dir === 'rotate-anti') {
+        return rotate(false);
       }
 
       action(dir);
@@ -264,8 +269,6 @@ function makeNewBlock() {
 
   game.controls.drop = false;
 
-  // clearTimeout(game.down);
-
   drawNext();
 
   if (!memory.isFree(game.current)) {
@@ -280,7 +283,7 @@ function makeNewBlock() {
 
 function rotate(clockwise) {
   if (game.running) {
-    game.current.rotate(clockwise);
+    game.current.rotate(!clockwise);
   }
 }
 
@@ -289,10 +292,12 @@ function action(type) {
   // this is a bit lazy, but it works.
   if (game.running) {
     game.controls[type] = true;
+    game.controls.todo = type;
   }
 }
 
 function cancelAction(type) {
+  game.controls.todo = null;
   game.controls[type] = false;
 }
 
@@ -300,8 +305,24 @@ function loop(delta) {
   if (game.running) {
     // check controls
     // 60 times per second - before the up occurs
+    if (game.controls.todo && delta - game.lastMove > 6 * FRAME_RATE) {
+      if (game.controls.todo === 'left') {
+        game.current.move(0);
+      }
 
-    if (delta - game.lastMove > 6 * FRAME_RATE) {
+      if (game.controls.todo === 'right') {
+        game.current.move(1);
+      }
+
+      if (game.controls.todo === 'drop') {
+        game.current.drop();
+      }
+
+      game.controls.todo = null;
+      game.lastMove = delta;
+    }
+
+    if (delta - game.lastMove > 16 * FRAME_RATE) {
       game.lastMove = delta;
       if (game.controls.left) {
         game.current.move(0);

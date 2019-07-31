@@ -23,6 +23,7 @@
     <div v-on:touchend="cancelInput('left')" v-on:touchstart="input('left', $event)" v-on:click="input('left', $event)" class="left"></div>
     <div v-on:touchend="cancelInput('right')" v-on:touchstart="input('right', $event)" v-on:click="input('right', $event)" class="right"></div>
     <div v-on:touchend="cancelInput('drop')" v-on:touchstart="input('drop', $event)" v-on:click="input('drop', $event)" class="down"></div>
+    <div v-on:click="input('rotate-anti', $event)" class="rotate-anti"></div>
     <div v-on:click="input('rotate', $event)" class="rotate"></div>
   </div>
 </div>

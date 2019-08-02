@@ -44,7 +44,7 @@ const game = new Vue({
     current: {},
     running: false,
     upAt: null,
-    autorepeatY: -96,
+    autorepeatY: 0,
     controls: {}
   },
   computed: {
@@ -290,7 +290,7 @@ function gameOver() {
 }
 
 function makeNewBlock() {
-  game.autorepeatY = -96;
+  game.autorepeatY = 0; // initial drop delay
   if (controller.down) {
     needsRelease('down');
   }

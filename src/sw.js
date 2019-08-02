@@ -2,7 +2,7 @@
 
 // we'll version our cache (and learn how to delete caches in
 // some other post)
-const cacheName = 'v22::static';
+const cacheName = 'v23::static';
 
 function updateStaticCache() {
   return caches.open(cacheName).then(cache => {
@@ -21,7 +21,11 @@ function updateStaticCache() {
       '/index.css',
       '/index.js',
       '/memory.js',
-      '/vue.js'
+      '/vue.js',
+      '/random.js',
+      '/gamepad.js',
+      '/controller.js',
+      '/manifest.json'
     ]);
   });
 }

@@ -18,6 +18,7 @@ export const loadMemory = test => {
     }
   }
 
+  pages.push(Uint8Array.from(memory));
   console.log(toString());
 };
 
@@ -72,7 +73,7 @@ export const write = tet => {
     w,
     h,
     shape,
-    type: { char },
+    type: { char }
   } = tet;
 
   // ordering is important so we can jump straight to the shape value
@@ -131,6 +132,30 @@ export const checkForLines = () => {
   }
 
   return res;
+};
+
+export const appendLines = (lines, gap = 4) => {
+  memory.copyWithin(
+    0,
+    getIndexForXY(0, lines - 1),
+    getIndexForXY(0, ROWS - 1) + 1
+  );
+
+  pages.push(Uint8Array.from(memory));
+
+  // clear the top line last
+  memory.fill(
+    1,
+    getIndexForXY(0, ROWS - lines),
+    getIndexForXY(COLS - 1, ROWS - 1) + 1
+  );
+
+  pages.push(Uint8Array.from(memory));
+  for (let i = 0; i < lines; i++) {
+    memory[getIndexForXY(gap, ROWS - i - 1)] = 0;
+  }
+
+  pages.push(Uint8Array.from(memory));
 };
 
 export const removeLine = y => {

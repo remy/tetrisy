@@ -7,8 +7,8 @@ const waitingRelease = {};
 
 const manualState = {};
 
-export function isPressed(button) {
-  return state[button] > RELEASED;
+export function isPressed(button, source = state) {
+  return source[button] > RELEASED;
 }
 
 export function needsRelease(button) {

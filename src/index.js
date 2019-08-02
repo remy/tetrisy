@@ -16,8 +16,10 @@ import {
   state as controller,
   RELEASED,
   needsRelease,
-  bindSelector
+  bindSelector,
+  isPressed
 } from './controller.js';
+
 // import * as TESTS from './tests.js';
 
 const game = new Vue({
@@ -36,11 +38,12 @@ const game = new Vue({
       last: 0
     },
     pageId: 0,
+    linesToInsert: 1,
     fps: 0,
     score: 0,
     speed: STARTING_SPEED,
     pages: memory.pages,
-    debug: false,
+    debug: true,
     current: {},
     running: false,
     upAt: null,
@@ -83,6 +86,9 @@ const game = new Vue({
     document.documentElement.className = `layout-${this.settings.layout}`;
   },
   methods: {
+    insertLines() {
+      memory.appendLines(this.linesToInsert);
+    },
     runningChange() {
       this.pageId = memory.pages.length - 1;
       memory.memory.set(memory.pages[this.pageId], 0);
@@ -91,34 +97,6 @@ const game = new Vue({
     pageChange() {
       memory.memory.set(memory.pages[this.pageId], 0);
       drawMemory();
-    },
-    cancelInput(dir) {
-      this.upAt = Date.now();
-      setTimeout(() => cancelAction(dir), FRAME_RATE * 10); // aim to clear the state in the next move frame
-    },
-    input(dir, e) {
-      // prevent click from firing straight after a touch event
-      if (e.type === 'click') {
-        if (Date.now() - 10 <= this.upAt) {
-          return;
-        }
-
-        this.cancelInput(dir);
-      }
-
-      document.body.dataset.input = 'mouse';
-
-      if (dir === 'rotate') {
-        return rotate(true);
-      }
-
-      if (dir === 'rotate-anti') {
-        return rotate(false);
-      }
-
-      action(dir);
-
-      e.target.blur();
     }
   }
 });
@@ -211,6 +189,11 @@ async function stop() {
   game.running = false;
   memory.write(game.current);
 
+  if (controller.down !== RELEASED) {
+    needsRelease('down');
+  }
+  // game.autorepeatY = 0;
+
   const lines = memory.checkForLines();
 
   if (lines.length) {
@@ -225,9 +208,9 @@ async function stop() {
   }
 
   game.running = true;
-  loop();
-
+  // debugger;
   makeNewBlock();
+  loop();
 }
 
 const randInt = (a, b) => ~~(Math.random() * (b - a) + a);
@@ -290,14 +273,9 @@ function gameOver() {
 }
 
 function makeNewBlock() {
-  game.autorepeatY = 0; // initial drop delay
-  if (controller.down) {
-    needsRelease('down');
-  }
+  game.autorepeatY = -1; // initial drop delay (not 100% sure why -1, but if it's zero, it blows up)
   game.current = game.next || new Tet();
   game.next = new Tet();
-
-  game.controls.drop = false;
 
   drawNext();
 
@@ -309,27 +287,6 @@ function makeNewBlock() {
     if (game.running) renderTetromino(game.current);
   };
   game.current.handlers.stop = stop;
-}
-
-function rotate(clockwise) {
-  if (game.running) {
-    game.current.rotate(!clockwise);
-  }
-}
-
-function action(type) {
-  // ensures all user actions go through the game running test.
-  // this is a bit lazy, but it works.
-  if (game.running && !game.controls.down) {
-    game.controls[type] = true;
-    game.controls.todo = type;
-  }
-}
-
-function cancelAction(type) {
-  game.controls.todo = null;
-  game.controls.down = false;
-  game.controls[type] = false;
 }
 
 function loop(delta) {
@@ -405,12 +362,13 @@ function loop(delta) {
         }
       } else {
         // down is pressed
-        if (
-          (game.autorepeatY > 3 && controller.down % 2 === 0) ||
-          game.autorepeatY === 3
-        ) {
-          console.log('soft drop');
-          game.current.drop();
+        if (isPressed('down')) {
+          if (
+            (game.autorepeatY > 3 && controller.down % 2 === 0) ||
+            game.autorepeatY === 3
+          ) {
+            game.current.drop();
+          }
         }
 
         if (controller.down === RELEASED) {
@@ -468,7 +426,7 @@ function setup() {
     false
   );
 
-  // memory.loadMemory(TESTS.B.base);
+  // memory.loadMemory(TESTS.A.base);
   // game.next = new Tet(TESTS.B.next);
 
   makeNewBlock();

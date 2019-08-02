@@ -1,38 +1,65 @@
 <!DOCTYPE html>
 <html data-debug="false" lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Tetrominos</title>
-  <link rel="icon" sizes="512x512" href="/favicon.png">
-  <link rel="shortcut icon" href="/favicon.png">
-  <link rel="manifest" href="manifest.json">
-  <link href="index.css" rel="stylesheet">
-</head>
-<body>
-<div id="game"></div>
-<pre class="debug" id="memdump"></pre>
-<div v-cloak id="controls">
-  <div id="score">{{ score | pad }}</div>
-  <div v-bind:hidden="!debug" id="more">
-    <label>Running <input v-on:change="runningChange" type="checkbox" v-model="running"></label>
-    <label>Memory page: <input type="range" v-on:change="pageChange" v-model="pageId" min="0" v-bind:max="pages.length - 1"> ({{ pageId | pad }})<label>
-  </div>
-  <div id="touch-controls">
-    <div v-on:touchend="cancelInput('left')" v-on:touchstart="input('left', $event)" v-on:click="input('left', $event)" class="left"></div>
-    <div v-on:touchend="cancelInput('right')" v-on:touchstart="input('right', $event)" v-on:click="input('right', $event)" class="right"></div>
-    <div v-on:touchend="cancelInput('drop')" v-on:touchstart="input('drop', $event)" v-on:click="input('drop', $event)" class="down"></div>
-    <div v-on:click="input('rotate-anti', $event)" class="rotate-anti"></div>
-    <div v-on:click="input('rotate', $event)" class="rotate"></div>
-  </div>
-</div>
-<script type="module" src="./index.js"></script>
-<script nomodule src="./bundle.js"></script>
-<script>
-  if ('serviceWorker' in navigator) { //} && location.hostname !== 'localhost' && !location.hostname.includes('192')) {
-    navigator.serviceWorker.register('/sw.js');
-  }
-  </script>
-</body>
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Tetrominos</title>
+    <link rel="icon" sizes="512x512" href="/favicon.png">
+    <link rel="shortcut icon" href="/favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <link href="index.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div v-cloak id="controls" v-bind:class="{ debug }">
+      <div id="game"></div>
+      <div id="score">{{ score | pad }}</div>
+      <div v-bind:hidden="!debug" id="more" v-on:keydown.stop v-on:keyup.stop v-on:click.stop>
+        <label>Running <input v-on:change="runningChange" type="checkbox" v-model="running"></label>
+        <label>Speed <input type="number" v-model.number="speed"></label>
+        <label>FPS: {{ fps | round }}</label>
+
+        <label>Memory page: <input type="range" v-on:change="pageChange" v-model="pageId" min="0"
+            v-bind:max="pages.length - 1"> ({{ pageId | pad }})</label>
+        <label class="controls">Controls: <span v-bind:class="{ active: controls.left !== -1 }">L
+            {{controls.left}}</span> <span v-bind:class="{ active: controls.down !== -1 }">D {{ controls.down}}</span>
+          <span v-bind:class="{ active: controls.right !== -1 }">R {{controls.right}}</span></label>
+        <label>autorepeatY: {{ autorepeatY }} </label>
+        <label>Block
+          <select v-model="currentType">
+            <option>T</option>
+            <option>J</option>
+            <option>Z</option>
+            <option>O</option>
+            <option>S</option>
+            <option>L</option>
+            <option>I</option>
+          </select>
+        </label>
+        <label>
+          <details>
+            <summary>Current</summary>
+            <pre>{{ game.current | toJSON }}</pre>
+          </details>
+        </label>
+      </div>
+      <div id="touch-controls" v-show="!debug">
+        <div class="left"></div>
+        <div class="right"></div>
+        <div class="down"></div>
+        <div class="rotate-anti"></div>
+        <div class="rotate"></div>
+      </div>
+    </div>
+    <script type="module" src="./index.js"></script>
+    <script nomodule src="./bundle.js"></script>
+    <script>
+      if ('serviceWorker' in navigator && location.hostname !== 'localhost' && !location.hostname.includes('192')) {
+        navigator.serviceWorker.register('/sw.js');
+      }
+    </script>
+  </body>
+
 </html>

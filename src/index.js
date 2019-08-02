@@ -10,35 +10,60 @@ import {
 } from './config.js';
 import { speedForLevel } from './speed.js';
 import * as memory from './memory.js';
-
+import {
+  PRESSED,
+  update as updateController,
+  state as controller,
+  RELEASED,
+  needsRelease,
+  bindSelector
+} from './controller.js';
 // import * as TESTS from './tests.js';
 
 const game = new Vue({
   el: '#controls',
   filters: {
-    pad: s => s.toString().padStart(3, '0')
+    pad: s => s.toString().padStart(3, '0'),
+    round: s => Math.round(s),
+    toJSON: d => JSON.stringify(d, 0, 2)
   },
   data: {
     settings: {
-      layout: 3
+      layout: 1
+    },
+    ticks: {
+      loop: 0,
+      last: 0
     },
     pageId: 0,
+    fps: 0,
     score: 0,
     speed: STARTING_SPEED,
-    lastLoop: 0,
-    lastMove: 0,
     pages: memory.pages,
     debug: false,
+    current: {},
     running: false,
     upAt: null,
-    controls: {
-      todo: '',
-      left: false,
-      right: false,
-      drop: false
+    autorepeatY: -96,
+    controls: {}
+  },
+  computed: {
+    currentType: {
+      get: function() {
+        return this.current.name;
+      },
+      set(value) {
+        game.next = new Tet(value);
+        makeNewBlock();
+      }
     }
   },
   mounted() {
+    bindSelector('left', '.left');
+    bindSelector('right', '.right');
+    bindSelector('down', '.down');
+    bindSelector('a', '.rotate');
+    bindSelector('b', '.rotate-anti');
     try {
       const searchParams = new URLSearchParams(window.location.search);
       let layout = searchParams.get('layout');
@@ -61,6 +86,7 @@ const game = new Vue({
     runningChange() {
       this.pageId = memory.pages.length - 1;
       memory.memory.set(memory.pages[this.pageId], 0);
+      if (this.running) loop();
     },
     pageChange() {
       memory.memory.set(memory.pages[this.pageId], 0);
@@ -100,7 +126,7 @@ const game = new Vue({
 function reset() {
   game.running = true;
   game.speed = STARTING_SPEED;
-  game.lastLoop = 0;
+  game.ticks = { loop: 0, move: 0, last: 0 };
   game.score = 0;
 }
 
@@ -264,6 +290,10 @@ function gameOver() {
 }
 
 function makeNewBlock() {
+  game.autorepeatY = -96;
+  if (controller.down) {
+    needsRelease('down');
+  }
   game.current = game.next || new Tet();
   game.next = new Tet();
 
@@ -290,7 +320,7 @@ function rotate(clockwise) {
 function action(type) {
   // ensures all user actions go through the game running test.
   // this is a bit lazy, but it works.
-  if (game.running) {
+  if (game.running && !game.controls.down) {
     game.controls[type] = true;
     game.controls.todo = type;
   }
@@ -298,104 +328,100 @@ function action(type) {
 
 function cancelAction(type) {
   game.controls.todo = null;
+  game.controls.down = false;
   game.controls[type] = false;
 }
 
 function loop(delta) {
   if (game.running) {
-    // check controls
-    // 60 times per second - before the up occurs
-    if (game.controls.todo && delta - game.lastMove > 6 * FRAME_RATE) {
-      if (game.controls.todo === 'left') {
-        game.current.move(0);
+    // run at 60fps, not faster
+    if (delta - game.ticks.last > FRAME_RATE) {
+      // check controls
+      // 60 times per second - before the up occurs
+
+      const lastState = { ...controller };
+      updateController(delta);
+
+      game.controls = controller;
+
+      // TODO shift
+      if (controller.left !== RELEASED) {
+        if (controller.left > 16 && controller.left % 6 === 0) {
+          game.current.left();
+        }
+      } else if (controller.right !== RELEASED) {
+        if (controller.right > 16 && controller.right % 6 === 0) {
+          game.current.right();
+        }
       }
 
-      if (game.controls.todo === 'right') {
-        game.current.move(1);
+      if (controller.left === RELEASED) {
+        if (lastState.left > RELEASED && lastState.left <= 16) {
+          game.current.left();
+        }
       }
 
-      if (game.controls.todo === 'drop') {
-        game.current.drop();
+      if (controller.right === RELEASED) {
+        if (lastState.right > RELEASED && lastState.right <= 16) {
+          game.current.right();
+        }
       }
 
-      game.controls.todo = null;
-      game.lastMove = delta;
+      // rotate
+      if (controller.a === PRESSED || controller.b === PRESSED) {
+        game.current.rotate(controller.b === PRESSED);
+        needsRelease(controller.b === PRESSED ? 'b' : 'a');
+      }
+
+      // down is being held
+      if (controller.left === RELEASED && controller.right === RELEASED) {
+        if (controller.down !== RELEASED) {
+          if (game.autorepeatY < 0) {
+            game.autorepeatY = 0; // works (not sure if that's a forced down though)
+          }
+
+          if (game.autorepeatY === 0 && controller.down === 3) {
+            game.autorepeatY = 1;
+          } else {
+            game.autorepeatY++;
+          }
+        }
+
+        if (lastState.down > 0 && controller.down === RELEASED) {
+          if (lastState.down < 3) {
+            // down was pressed and released
+            game.autorepeatY = 1;
+          } else {
+            game.autorepeatY = 0;
+          }
+        }
+      }
+
+      if (game.autorepeatY === 0) {
+        // normal drop at game speed
+        if (delta - game.ticks.loop > game.speed) {
+          game.ticks.loop = delta;
+          game.current.drop();
+        }
+      } else {
+        // down is pressed
+        if (
+          (game.autorepeatY > 3 && controller.down % 2 === 0) ||
+          game.autorepeatY === 3
+        ) {
+          console.log('soft drop');
+          game.current.drop();
+        }
+
+        if (controller.down === RELEASED) {
+          game.autorepeatY++;
+        }
+      }
+
+      game.ticks.last = delta;
     }
 
-    if (delta - game.lastMove > 16 * FRAME_RATE) {
-      game.lastMove = delta;
-      if (game.controls.left) {
-        game.current.move(0);
-      }
-
-      if (game.controls.right) {
-        game.current.move(1);
-      }
-
-      if (game.controls.drop) {
-        game.current.drop();
-      }
-    }
-
-    if (delta - game.lastLoop > game.speed) {
-      game.lastLoop = delta;
-      game.current.drop();
-    }
     requestAnimationFrame(loop);
-  }
-}
-
-function handleKeyUp(e) {
-  if (e.which === 37) {
-    // left
-    cancelAction('left');
-  }
-
-  if (e.which === 40) {
-    // down
-    cancelAction('drop');
-  }
-
-  if (e.which === 39) {
-    // right
-    cancelAction('right');
-  }
-}
-
-function handleKeyDown(e) {
-  document.body.dataset.input = 'keys';
-
-  if (e.which === 37) {
-    // left
-    action('left');
-    return;
-  }
-
-  if (e.key === 'ArrowDown') {
-    // down
-    action('drop');
-    return;
-  }
-
-  if (e.which === 39) {
-    // right
-    action('right');
-    return;
-  }
-
-  if (e.which === 32 || e.which === 38) {
-    // space
-    rotate(!e.shiftKey);
-  }
-
-  if (e.which === 13) {
-    // enter
-    //     action('dropFast');
-  }
-
-  if (e.which === 191) {
-    // ?
-    game.debug = !game.debug;
   }
 }
 
@@ -430,8 +456,17 @@ function setup() {
     ).style.gridTemplateColumns = `auto ${ctx.canvas.offsetWidth -
       BRICK_SIZE}px auto`;
   }
-  window.onkeydown = handleKeyDown;
-  window.onkeyup = handleKeyUp;
+
+  window.addEventListener(
+    'keydown',
+    e => {
+      if (e.which === 191) {
+        // ?
+        game.debug = !game.debug;
+      }
+    },
+    false
+  );
 
   // memory.loadMemory(TESTS.B.base);
   // game.next = new Tet(TESTS.B.next);

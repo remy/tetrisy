@@ -2,6 +2,7 @@ import * as blocks from './blocks.js';
 import { COLS } from './config.js';
 import { arrayToNum, numToArray } from './bit-tools.js';
 import * as memory from './memory.js';
+import random from './random.js';
 
 const types = Object.keys(blocks);
 const limited = ['I', 'J', 'L', 'O', 'T'];
@@ -9,7 +10,7 @@ const limited = ['I', 'J', 'L', 'O', 'T'];
 let last = [];
 
 export default class Tetromino {
-  constructor(name = types[(Math.random() * types.length) | 0]) {
+  constructor(name = types[random(7)]) {
     last.push(name);
     last = last.slice(-4);
     if (last.join('').replace(/[SZ]/g, '') === '') {
@@ -36,7 +37,7 @@ export default class Tetromino {
 
     let shape;
 
-    if (rotation < 0) rotation = 3;
+    if (rotation < 0) rotation = (this.type.rotations || 4) - 1;
 
     if (rotation === 0) {
       shape = Array.from(this.type.shape);
@@ -56,7 +57,7 @@ export default class Tetromino {
     }
 
     if (rotation === 3) {
-      // 27deg
+      // 270deg
       shape = numToArray(
         arrayToNum(this.type.shape) ^ this.type.rotate,
         this.shape.length
@@ -77,6 +78,14 @@ export default class Tetromino {
 
       this.emit('draw');
     }
+  }
+
+  left() {
+    this.move(0);
+  }
+
+  right() {
+    this.move(1);
   }
 
   move(direction) {

@@ -3,13 +3,13 @@ import * as gamepad from './gamepad.js';
 export const RELEASED = -1;
 export const PRESSED = 1;
 
-export const PRESSED_FOR_1_FRAME = 2;
-export const PRESSED_FOR_2_FRAME = 3;
-export const PRESSED_FOR_3_FRAME = 4;
-
 const waitingRelease = {};
 
 const manualState = {};
+
+export function isPressed(button) {
+  return state[button] > RELEASED;
+}
 
 export function needsRelease(button) {
   waitingRelease[button] = true;
@@ -66,11 +66,7 @@ function handleKeys(e) {
   const pressed = e.type === 'keydown';
   let key = null;
 
-  // document.body.dataset.input = 'keys';
-
   if (e.code === 'Space' || e.code === 'KeyA' || e.code === 'KeyB') {
-    // space
-    // action('drop');
     key = e.code === 'KeyB' ? 'b' : 'a';
   }
 
@@ -89,16 +85,6 @@ function handleKeys(e) {
   if (key) {
     manualState[key] = pressed;
   }
-
-  // if (e.which === 13) {
-  //   // enter
-  //   //     action('dropFast');
-  // }
-
-  // if (e.which === 191) {
-  //   // ?
-  //   game.debug = !game.debug;
-  // }
 }
 
 window.addEventListener('keydown', handleKeys, false);

@@ -21,12 +21,18 @@ export default (token, ready) => {
     }
   });
 
+  let win = () => {};
+
   const run = () => {
     setSeed(seed);
     console.log('setting seed: %s', seed);
 
     state = JOINED;
     ready({
+      onWin: callback => (win = callback),
+      gameOver: () => {
+        socket.send({ type: 'gameOver' });
+      },
       lines: lines => {
         const time = Date.now();
         socket.send({ type: 'lines', lines, time });
@@ -41,8 +47,6 @@ export default (token, ready) => {
 
     if (type === 'join' && state !== JOINED) {
       if (data.state === WAITING) {
-        console.log('> WAITING');
-
         player = 1;
         latency = time - data.time;
         state = SENT_ACK;
@@ -50,7 +54,6 @@ export default (token, ready) => {
       }
 
       if (data.state === SENT_ACK) {
-        console.log('> SENT_ACK');
         player = 2;
         latency = data.latency;
         state = READY;
@@ -60,11 +63,15 @@ export default (token, ready) => {
       }
 
       if (data.state === READY) {
-        console.log('> READY');
         state = READY;
         seed = data.seed;
         run();
       }
+    }
+
+    if (type === 'gameOver') {
+      // we won
+      win();
     }
 
     if (type === 'lines') {

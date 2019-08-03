@@ -41,6 +41,7 @@ const game = new Vue({
     linesToInsert: 1,
     fps: 0,
     score: 0,
+    multi: false,
     speed: STARTING_SPEED,
     pages: memory.pages,
     debug: false,
@@ -85,6 +86,7 @@ const game = new Vue({
       const room = searchParams.get('join');
       if (room) {
         import('./join.js').then(module => {
+          /* waiting logic */
           game.running = false;
           game.score = !isNaN(parseInt(room, 10))
             ? room
@@ -95,9 +97,13 @@ const game = new Vue({
             game.current.rotate(true);
             renderTetromino(game.current);
           }, 200);
-          module.default(game.score, ({ lines }) => {
-            this.lines = lines;
-            this.multi = true;
+          /* end waiting logic */
+
+          module.default(game.score, methods => {
+            this.multi = methods;
+            methods.onWin(() => {
+              if (game.running) gameOver('YOU WIN!');
+            });
             game.next = null;
             clearInterval(timer);
             setup();
@@ -226,7 +232,7 @@ async function stop() {
 
   if (lines.length) {
     if (game.multi) {
-      game.lines(lines.length);
+      game.multi.lines(lines.length);
     }
     await Promise.all(
       lines.map((y, i) => {
@@ -246,7 +252,7 @@ async function stop() {
 
 const randInt = (a, b) => ~~(Math.random() * (b - a) + a);
 
-function glitch() {
+function glitch(text) {
   const { ctx } = game;
   const canvas = ctx.canvas;
   const { width: w, height: h } = canvas;
@@ -280,26 +286,25 @@ function glitch() {
     );
   }
 
-  gameOverText();
+  gameOverText(text);
 }
 
-function gameOverText() {
+function gameOverText(text = 'GAME OVER') {
   game.ctx.globalCompositeOperation = 'xor';
   game.ctx.font = '4vh monospace';
-  game.ctx.fillText(
-    'GAME OVER',
-    BRICK_SIZE * COLS * 0.15,
-    (ROWS * BRICK_SIZE) / 2
-  );
+  game.ctx.fillText(text, BRICK_SIZE * COLS * 0.15, (ROWS * BRICK_SIZE) / 2);
   game.ctx.globalCompositeOperation = 'source-over';
 }
 
-function gameOver() {
+function gameOver(text) {
   game.running = false; // game over
+  if (game.multi) {
+    game.multi.gameOver();
+  }
   setInterval(() => {
     drawMemory();
-    gameOverText();
-    setTimeout(glitch, randInt(250, 1000));
+    gameOverText(text);
+    setTimeout(() => glitch(text), randInt(250, 1000));
   }, 500);
 }
 

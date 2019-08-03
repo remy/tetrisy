@@ -4,22 +4,23 @@ export const memory = new Uint8Array(ROWS * COLS);
 export const pages = [Uint8Array.from(memory)];
 
 export const loadMemory = test => {
+  reset();
   const lines = test.split('\n');
-  let ctr = 0;
-  for (let i = 0; i < lines.length; i++) {
-    for (let k = 0; k < lines[i].length; k++) {
+  let ctr = memory.length - 1;
+  for (let i = lines.length - 1; i >= 0; i--) {
+    for (let k = lines[i].length - 1; k >= 0; k--) {
       const chr = lines[i][k];
       if (chr !== '0') {
         memory[ctr] = chr.charCodeAt(0);
       } else {
         memory[ctr] = 0;
       }
-      ctr++;
+      ctr--;
     }
   }
 
   pages.push(Uint8Array.from(memory));
-  console.log(toString());
+  // console.log(toString());
 };
 
 export const reset = () => {
@@ -137,20 +138,17 @@ export const checkForLines = () => {
 export const appendLines = (lines, gap = 4) => {
   memory.copyWithin(
     0,
-    getIndexForXY(0, lines - 1),
-    getIndexForXY(0, ROWS - 1) + 1
+    getIndexForXY(0, lines) // X:0, Y:1 = width * y + x; = 20 * 1 + 0
+    // getIndexForXY(0, ROWS - 1) + 1
   );
-
-  pages.push(Uint8Array.from(memory));
 
   // clear the top line last
   memory.fill(
     1,
-    getIndexForXY(0, ROWS - lines),
-    getIndexForXY(COLS - 1, ROWS - 1) + 1
+    getIndexForXY(0, ROWS - lines) // ROWS = 20, lines = 1 = X:0, Y:19
+    // getIndexForXY(COLS - 1, ROWS - 1) + 1 //
   );
 
-  pages.push(Uint8Array.from(memory));
   for (let i = 0; i < lines; i++) {
     memory[getIndexForXY(gap, ROWS - i - 1)] = 0;
   }

@@ -28,7 +28,7 @@ export const SPEEDS = [
   0.033,
   0.033,
   0.033,
-  0.017,
+  0.017
 ];
 
 export function speedForLevel(level) {

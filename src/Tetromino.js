@@ -13,9 +13,7 @@ export default class Tetromino {
   constructor(name = types[random(7)]) {
     last.push(name);
     last = last.slice(-4);
-    if (last.join('').replace(/[SZ]/g, '') === '') {
-      console.log('giving you a break');
-
+    if (last.length === 4 && last.join('').replace(/[SZ]/g, '') === '') {
       name = limited[(Math.random() * limited.length) | 0];
     }
 

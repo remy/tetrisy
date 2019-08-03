@@ -3,3 +3,4 @@ dist
 .cache
 .vscode
 ./bundle.js
+.nyc_output

@@ -43,7 +43,7 @@ const game = new Vue({
     score: 0,
     speed: STARTING_SPEED,
     pages: memory.pages,
-    debug: true,
+    debug: false,
     current: {},
     running: false,
     upAt: null,
@@ -67,6 +67,7 @@ const game = new Vue({
     bindSelector('down', '.down');
     bindSelector('a', '.rotate');
     bindSelector('b', '.rotate-anti');
+
     try {
       const searchParams = new URLSearchParams(window.location.search);
       let layout = searchParams.get('layout');
@@ -80,12 +81,38 @@ const game = new Vue({
         );
       }
       this.settings.layout = layout;
+
+      const room = searchParams.get('join');
+      if (room) {
+        import('./join.js').then(module => {
+          game.running = false;
+          game.score = !isNaN(parseInt(room, 10))
+            ? room
+            : (Math.random() * 999) | 0;
+          game.current = new Tet('T');
+          game.current.y = ((ROWS / 2) | 0) - 2;
+          const timer = setInterval(() => {
+            game.current.rotate(true);
+            renderTetromino(game.current);
+          }, 200);
+          module.default(game.score, ({ lines }) => {
+            this.lines = lines;
+            this.multi = true;
+            game.next = null;
+            clearInterval(timer);
+            setup();
+          });
+        });
+      }
     } catch (e) {
       // noop
     }
     document.documentElement.className = `layout-${this.settings.layout}`;
   },
   methods: {
+    restart() {
+      setup();
+    },
     insertLines() {
       memory.appendLines(this.linesToInsert);
     },
@@ -104,8 +131,9 @@ const game = new Vue({
 function reset() {
   game.running = true;
   game.speed = STARTING_SPEED;
-  game.ticks = { loop: 0, move: 0, last: 0 };
+  game.ticks = { loop: 0, last: 0 };
   game.score = 0;
+  memory.reset();
 }
 
 function updateSpeed() {
@@ -197,6 +225,9 @@ async function stop() {
   const lines = memory.checkForLines();
 
   if (lines.length) {
+    if (game.multi) {
+      game.lines(lines.length);
+    }
     await Promise.all(
       lines.map((y, i) => {
         memory.removeLine(y + i);
@@ -387,7 +418,7 @@ function setup() {
   reset();
 
   Array.from(document.querySelectorAll('canvas')).forEach(_ => {
-    document.body.removeChild(_);
+    _.parentNode.removeChild(_);
   });
 
   // TODO remove the canvas
@@ -415,17 +446,6 @@ function setup() {
       BRICK_SIZE}px auto`;
   }
 
-  window.addEventListener(
-    'keydown',
-    e => {
-      if (e.which === 191) {
-        // ?
-        game.debug = !game.debug;
-      }
-    },
-    false
-  );
-
   // memory.loadMemory(TESTS.A.base);
   // game.next = new Tet(TESTS.B.next);
 
@@ -436,6 +456,16 @@ function setup() {
 function test(t = 'L') {
   renderTetromino(new Tet(t));
 }
+
+window.addEventListener(
+  'keydown',
+  e => {
+    if (e.which === 191) {
+      game.debug = !game.debug;
+    }
+  },
+  false
+);
 
 setup();
 

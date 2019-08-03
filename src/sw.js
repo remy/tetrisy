@@ -2,7 +2,7 @@
 
 // we'll version our cache (and learn how to delete caches in
 // some other post)
-const cacheName = 'v26::static';
+const cacheName = 'v27::static';
 
 function updateStaticCache() {
   return caches.open(cacheName).then(cache => {
@@ -54,6 +54,7 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const req = event.request;
+  const url = new URL(req.url);
   event.respondWith(
     caches.match(req).then(res => {
       if (res) {
@@ -61,8 +62,10 @@ self.addEventListener('fetch', event => {
       }
 
       return fetch(req).then(res => {
-        const clone = res.clone();
-        caches.open(cacheName).then(cache => cache.put(req, clone));
+        if (url.hostname === 'tetris.isthe.link') {
+          const clone = res.clone();
+          caches.open(cacheName).then(cache => cache.put(req, clone));
+        }
         return res;
       });
     })

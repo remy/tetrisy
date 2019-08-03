@@ -29,6 +29,7 @@ export default (token, ready) => {
 
     state = JOINED;
     ready({
+      player,
       onWin: callback => (win = callback),
       gameOver: () => {
         socket.send({ type: 'gameOver' });

@@ -104,11 +104,11 @@ export function bindSelector(key, selector) {
     manualState[key] = pressed;
   };
 
-  el.addEventListener('touchstart', listener, false);
-  el.addEventListener('touchend', listener, false);
-  el.addEventListener('touchcancel', listener, false);
-  el.addEventListener('mousedown', listener, false);
-  el.addEventListener('mouseup', listener, false);
+  el.addEventListener('touchstart', listener, { passive: true });
+  el.addEventListener('touchend', listener, { passive: true });
+  el.addEventListener('touchcancel', listener, { passive: true });
+  el.addEventListener('mousedown', listener, { passive: true });
+  el.addEventListener('mouseup', listener, { passive: true });
 }
 
 export function update() {

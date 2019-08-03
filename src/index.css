@@ -83,9 +83,10 @@ button {
 
 html,
 body {
-  overflow: hidden;
+/*   overscroll-behavior: none; */
+/*   overflow: hidden; */
   margin: 0;
-  height: 100%;
+  min-height: 100%;
   background: black;
 }
 
@@ -153,14 +154,14 @@ body {
   transform: scaleX(-1);
 }
 
-[data-input='mouse'] #touch-controls :active,
-[data-input='mouse'] #touch-controls .show {
-  opacity: 0.2;
+#touch-controls :active,
+#touch-controls .show {
+  opacity: 0.5;
 }
 
 @keyframes reveal {
   0% {
-    opacity: 0.5;
+    opacity: 0.7;
   }
   100% {
     opacity: 0;

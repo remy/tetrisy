@@ -1,4 +1,4 @@
-let seed = Date.now();
+let seed = Date.now() & 0xff;
 
 let ctr = 0;
 
@@ -10,16 +10,14 @@ export function resetCounter() {
   ctr = 0;
 }
 
-export default function pick(n) {
+export default function random(n = 7) {
   ctr++;
-  let index = random() >> 8; // high byte
-  index += ctr;
+  let value = ((((seed >> 9) & 1) ^ ((seed >> 1) & 1)) << 15) | (seed >> 1);
 
-  return index % n;
-}
-
-function random() {
-  const value = ((((seed >> 9) & 1) ^ ((seed >> 1) & 1)) << 15) | (seed >> 1);
   seed = value;
+  value >>= 8; // high byte
+  value += ctr;
+  value %= n;
+
   return value;
 }

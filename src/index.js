@@ -1,4 +1,4 @@
-import Vue from './vue.js';
+import Vue from './vendor/vue.js';
 import makeCanvas from './canvas.js';
 import Tet from './Tetromino.js';
 import {

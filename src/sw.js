@@ -2,7 +2,7 @@
 
 // we'll version our cache (and learn how to delete caches in
 // some other post)
-const cacheName = 'v27::static';
+const cacheName = 'v28::static';
 
 function updateStaticCache() {
   return caches.open(cacheName).then(cache => {

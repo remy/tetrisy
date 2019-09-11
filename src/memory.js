@@ -90,8 +90,6 @@ export const write = tet => {
   }
 
   pages.push(Uint8Array.from(memory));
-
-  //   document.querySelector('#memdump').innerHTML = toString().replace(/0/g, '🔲').replace(/1/g, '🔳')
 };
 
 export const test = tet => {
@@ -99,7 +97,7 @@ export const test = tet => {
 
   const res = new Uint8Array(shape.length);
   let hit = false;
-  // ordering is important so we can jump straight to the shape value
+
   let ctr = 0;
   for (let k = y; k < y + h; k++) {
     for (let j = x; j < x + w; j++) {
